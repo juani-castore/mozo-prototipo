@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 const Checkout = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: 'Juan Pérez',
-    email: 'juan.perez@gmail.com',
-    address: 'Av. Principal 123',
-    cardNumber: '4111 1111 1111 1111',
-    expiration: '12/25',
+    name: 'Juani Castore',
+    email: 'correo@gmail.com',
+    address: 'Av. Alcorta 123',
+    cardNumber: '1111 1111 1111 1111',
+    expiration: '12/26',
     cvv: '123',
   });
 
