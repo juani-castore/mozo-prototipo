@@ -1,13 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: 'Juan Pérez',
+    email: 'juan.perez@gmail.com',
+    address: 'Av. Principal 123',
+    cardNumber: '4111 1111 1111 1111',
+    expiration: '12/25',
+    cvv: '123',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Redirige a la pantalla de confirmación
+    navigate('/order-confirmation');
+  };
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>Checkout</h2>
-      <p>Gracias por tu pedido. Presiona el botón para confirmar tu compra.</p>
-      <button style={{ padding: '0.5rem', backgroundColor: '#6200ea', color: 'white', border: 'none', borderRadius: '5px' }}>
-        Confirmar pago
-      </button>
+    <div className="container">
+      <h2>Formulario de Pago</h2>
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Nombre completo:</label>
+          <input type="text" name="name" value={formData.name} onChange={handleChange} style={{ width: '100%', padding: '0.5rem' }} />
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Correo electrónico:</label>
+          <input type="email" name="email" value={formData.email} onChange={handleChange} style={{ width: '100%', padding: '0.5rem' }} />
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Dirección:</label>
+          <input type="text" name="address" value={formData.address} onChange={handleChange} style={{ width: '100%', padding: '0.5rem' }} />
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Número de tarjeta:</label>
+          <input type="text" name="cardNumber" value={formData.cardNumber} onChange={handleChange} style={{ width: '100%', padding: '0.5rem' }} />
+        </div>
+        <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
+          <div>
+            <label>Expiración:</label>
+            <input type="text" name="expiration" value={formData.expiration} onChange={handleChange} style={{ width: '100%', padding: '0.5rem' }} />
+          </div>
+          <div>
+            <label>CVV:</label>
+            <input type="text" name="cvv" value={formData.cvv} onChange={handleChange} style={{ width: '100%', padding: '0.5rem' }} />
+          </div>
+        </div>
+        <button type="submit" style={{ width: '100%' }}>Confirmar Pago</button>
+      </form>
     </div>
   );
 };

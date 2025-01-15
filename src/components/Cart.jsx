@@ -15,16 +15,24 @@ const Cart = () => {
     <div style={{ padding: '2rem' }}>
       <h2>Carrito</h2>
       {cart.map((item) => (
-        <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '8px' }}>
+        <div key={item.id} style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '1rem',
+          border: '1px solid var(--brick)',
+          padding: '1rem',
+          borderRadius: '8px',
+          backgroundColor: 'white',
+        }}>
           <span>{item.name} - {item.price}</span>
-          <button onClick={() => removeFromCart(item.id)} style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '0.5rem', borderRadius: '5px' }}>
+          <button onClick={() => removeFromCart(item.id)} style={{ backgroundColor: 'red', color: 'white' }}>
             Eliminar
           </button>
         </div>
       ))}
       {cart.length > 0 && (
         <Link to="/checkout">
-          <button style={{ padding: '0.5rem', backgroundColor: '#6200ea', color: 'white', border: 'none', borderRadius: '5px' }}>Ir a pagar</button>
+          <button style={{ padding: '0.5rem', backgroundColor: 'var(--gold)', color: 'white', borderRadius: '5px' }}>Ir a pagar</button>
         </Link>
       )}
     </div>
