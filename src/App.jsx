@@ -1,15 +1,22 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Menu from './components/Menu';
+import Cart from './components/Cart';
+import Checkout from './components/Checkout';
 
 function App() {
   return (
-    <div>
+    <Router>
       <Navbar />
-      <div style={{ padding: '2rem', backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
-        <h1 style={{ color: '#333', textAlign: 'center' }}>¡Hola! Mozo está funcionando</h1>
-      </div>
-    </div>
+      <Routes>
+        <Route path="/" element={<Menu />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
+
