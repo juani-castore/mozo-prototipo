@@ -56,6 +56,26 @@ const Navbar = () => {
         >
           Carrito
         </Link>
+        {/* Nuevo botón Mozo */}
+        <a
+          href="https://mozo-phi.vercel.app/" // Cambia esta URL cuando tengas el link final
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            textDecoration: "none",
+            color: "var(--gold)",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            padding: "0.5rem 1rem",
+            border: "1px solid var(--gold)",
+            borderRadius: "5px",
+            backgroundColor: "transparent",
+            cursor: "pointer",
+            textAlign: "center",
+          }}
+        >
+          MOZO
+        </a>
       </div>
     </nav>
   );
