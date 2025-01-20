@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { CartContext } from "../CartContext";
 
 const Cart = () => {
-  const [cart, setCart] = useState([
-    { id: 4, name: 'Wrap', price: '$5500' },
-    { id: 5, name: 'Café', price: '$2500' },
-  ]);
+  const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
 
-  const removeFromCart = (id) => {
-    setCart(cart.filter((item) => item.id !== id));
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => total + item.precio * item.quantity, 0);
+  };
+
+  const handleIncrease = (productId) => {
+    const product = cart.find((item) => item.id === productId);
+    updateQuantity(productId, product.quantity + 1);
+  };
+
+  const handleDecrease = (productId) => {
+    const product = cart.find((item) => item.id === productId);
+    if (product.quantity > 1) {
+      updateQuantity(productId, product.quantity - 1);
+    } else {
+      removeFromCart(productId);
+    }
   };
 
   return (
@@ -19,84 +31,48 @@ const Cart = () => {
           <div
             key={item.id}
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1.5rem',
-              padding: '1rem',
-              borderRadius: '8px',
-              backgroundColor: 'var(--white)',
-              border: '1px solid var(--brick)',
-              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-              minHeight: '100px', // Altura fija
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+              border: "1px solid var(--brick)",
+              padding: "1rem",
+              borderRadius: "8px",
             }}
           >
-            <div
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                gap: '0.3rem', // Espaciado interno más compacto
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: 'bold',
-                  fontSize: '1rem',
-                  lineHeight: '1.2',
-                }}
-              >
-                {item.name}
-              </span>
-              <span style={{ color: 'var(--brick)', fontSize: '0.9rem' }}>
-                {item.price}
-              </span>
+            <span>
+              {item.nombre} x {item.quantity}
+            </span>
+            <div>
+              <button onClick={() => handleDecrease(item.id)}>-</button>
+              <button onClick={() => handleIncrease(item.id)}>+</button>
             </div>
-            <button
-              onClick={() => removeFromCart(item.id)}
-              style={{
-                backgroundColor: 'red',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                padding: '0.4rem 0.6rem',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                minWidth: '70px',
-                height: '35px', // Altura consistente del botón
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              Eliminar
-            </button>
           </div>
         ))
       ) : (
-        <p style={{ textAlign: 'center', color: 'var(--brick)' }}>
-          Tu carrito está vacío.
-        </p>
+        <p>Tu carrito está vacío.</p>
       )}
       {cart.length > 0 && (
-        <Link to="/checkout">
-          <button
-            style={{
-              width: '100%',
-              backgroundColor: 'var(--gold)',
-              color: 'white',
-              padding: '0.7rem',
-              borderRadius: '5px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              marginTop: '1rem',
-            }}
-          >
-            Ir a pagar
-          </button>
-        </Link>
+        <>
+          <h3>Total: ${calculateTotal()}</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1.5rem" }}>
+            <Link to="/checkout">
+              <button>Ir a pagar</button>
+            </Link>
+            <button onClick={clearCart} style={{
+              backgroundColor: "var(--brick)",
+              color: "var(--white)",
+              border: "none",
+              padding: "0.7rem 1.5rem",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              transition: "background-color 0.3s ease",
+            }}>
+              Limpiar carrito
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

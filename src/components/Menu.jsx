@@ -1,33 +1,57 @@
-import React, { useState } from 'react';
-import ProductCard from './ProductCard';
-import Notification from './Notification';
+import React, { useContext, useEffect, useState } from "react";
+import ProductCard from "./ProductCard";
+import Notification from "./Notification";
+import { CartContext } from "../CartContext";
 
 const Menu = () => {
-  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
   const [notification, setNotification] = useState(null);
+  const { addToCart } = useContext(CartContext); // Usa el contexto del carrito
 
-  const products = [
-    { id: 1, name: 'Hamburguesa', price: '$10000' },
-    { id: 2, name: 'Pizza', price: '$9500' },
-    { id: 3, name: 'Ensalada', price: '$6000' },
-    { id: 4, name: 'Wrap (recomendado por mozo)', price: '$5500' },
-    { id: 5, name: 'Café', price: '$2500' },
-  ];
+  const sheetId = "1sYejTzDsxt4ff9sw-7afhJ-FckfFBmwNZpUlsl59jgc";
+  const apiKey = "AIzaSyDUZTIdv8SZ_ZdPEXpGx2yRhtthD_eYA70";
 
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-    setNotification(`¡${product.name} agregado al carrito!`);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:D100?key=${apiKey}`
+        );
+        const data = await response.json();
+
+        if (data.values) {
+          const headers = data.values[0];
+          const rows = data.values.slice(1);
+          const formattedData = rows.map((row) =>
+            headers.reduce((acc, header, index) => {
+              acc[header.toLowerCase()] = row[index];
+              return acc;
+            }, {})
+          );
+          setProducts(formattedData);
+        }
+      } catch (error) {
+        console.error("Error al cargar los datos:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleAddToCart = (product) => {
+    addToCart(product);
+    setNotification(`¡${product.nombre} agregado al carrito!`);
   };
 
   return (
     <div className="container">
       <h2>Menú</h2>
       <div className="grid">
-        {products.map((product) => (
+        {products.map((product, index) => (
           <ProductCard
-            key={product.id}
+            key={index}
             product={product}
-            onAddToCart={() => addToCart(product)}
+            onAddToCart={() => handleAddToCart(product)}
           />
         ))}
       </div>
@@ -40,5 +64,6 @@ const Menu = () => {
     </div>
   );
 };
+
 
 export default Menu;
