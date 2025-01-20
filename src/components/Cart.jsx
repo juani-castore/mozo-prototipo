@@ -23,8 +23,48 @@ const Cart = () => {
     }
   };
 
+  const generateOrderId = () => {
+    const palabras = [
+      "sol", "luna", "estrella", "mar", "tierra", "viento", "fuego",
+      "agua", "nube", "montaña", "río", "bosque", "cielo", "flor", "piedra",
+      "árbol", "hoja", "raíz", "roca", "lluvia", "trueno", "nieve", "tormenta",
+      "arena", "costa", "playa", "olas", "desierto", "isla", "valle", "pradera",
+      "pájaro", "pez", "tigre", "león", "lobo", "oso", "ciervo", "águila", "zorro",
+      "camino", "sendero", "puente", "ciudad", "aldea", "puerto", "torre", "castillo",
+      "cabaña", "cueva", "faro", "barco", "velero", "tren", "avión", "camión",
+      "coche", "bicicleta", "carro", "motor", "puerta", "ventana", "techo", "pared",
+      "suelo", "mesa", "silla", "espejo", "cama", "almohada", "lámpara", "fuego",
+      "humo", "chispas", "cuchillo", "plato", "vaso", "taza", "cubierto", "fresa",
+      "manzana", "pera", "uva", "plátano", "naranja", "limón", "melón", "sandía",
+      "cereza", "durazno", "mango", "piña", "coco", "almendra", "nuez", "avellana",
+      "guitarra", "piano", "violín", "batería", "arpa", "flauta", "maraca", "tambor",
+      "campana", "notas", "música", "canción", "melodía", "ritmo", "invierno",
+      "primavera", "verano", "otoño", "amanecer", "atardecer", "noche", "día",
+      "sombra", "luz", "color", "rojo", "azul", "verde", "amarillo", "naranja",
+      "morado", "negro", "blanco", "gris", "marrón", "dorado", "plata", "rosa",
+      "celeste", "beige", "turquesa", "lavanda", "ocre", "vino", "magenta", "índigo",
+      "girasol", "tulipán", "orquídea", "lirio", "dalia", "azucena", "clavel",
+      "jazmín", "violeta", "margarita", "hibisco", "mariposa", "abeja", "libélula",
+      "escarabajo", "araña", "hormiga", "grillo", "mosquito", "saltamontes", "caracol",
+      "lagartija", "serpiente", "rana", "sapo", "cocodrilo", "caballo", "gato",
+      "perro", "conejo", "ardilla", "ratón", "tortuga", "delfín", "ballena", "tiburón",
+      "estrella", "galaxia", "planeta", "cometa", "eclipse", "satélite", "constelación",
+      "universo", "nave", "meteorito", "asteroide", "aurora", "polvo", "trigo", "maíz",
+      "arroz", "avena", "quinoa", "cebada", "frijol", "lenteja", "soja", "espiga",
+      "césped", "campo", "prado", "corazón", "sonrisa", "amigo", "familia", "paz",
+      "alegría", "felicidad", "esperanza", "sueño", "luz", "fuerza", "valentía",
+      "gratitud", "amor", "abrazo", "calor", "libertad", "volcán", "lava", "ceniza",
+      "huracán", "terremoto", "paz", "destino", "viaje", "aventura", "cultura",
+      "idioma", "arte", "historia", "pintura", "escultura", "danza", "teatro",
+      "literatura", "poesía", "filosofía", "ciudad", "nación", "país", "planeta"
+    ];
+
+    return palabras[Math.floor(Math.random() * palabras.length)];
+  };
+
   const handleSendOrder = () => {
-    const phoneNumber = "5492645271386"; // Reemplaza con el número del restaurante
+    const phoneNumber = "5493814023228"; // Reemplaza con el número del restaurante
+    const orderId = generateOrderId();
     const orderDetails = cart
       .map(
         (item) =>
@@ -32,7 +72,7 @@ const Cart = () => {
       )
       .join("\n");
     const total = calculateTotal();
-    const message = `Hola, quiero realizar el siguiente pedido:\n\n${orderDetails}\n\nTotal: $${total}\n\nGracias.`;
+    const message = `Hola, quiero realizar el siguiente pedido:\n\n${orderDetails}\n\nTotal: $${total}\n\nMi identificador de pedido es: ${orderId}\n\nGracias.`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
