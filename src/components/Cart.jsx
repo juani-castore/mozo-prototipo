@@ -23,6 +23,22 @@ const Cart = () => {
     }
   };
 
+  const handleSendOrder = () => {
+    const phoneNumber = "5492645271386"; // Reemplaza con el número del restaurante
+    const orderDetails = cart
+      .map(
+        (item) =>
+          `- ${item.nombre} x ${item.quantity} ($${item.precio * item.quantity})`
+      )
+      .join("\n");
+    const total = calculateTotal();
+    const message = `Hola, quiero realizar el siguiente pedido:\n\n${orderDetails}\n\nTotal: $${total}\n\nGracias.`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <div className="container">
       <h2>Carrito</h2>
@@ -59,17 +75,35 @@ const Cart = () => {
             <Link to="/checkout">
               <button>Ir a pagar</button>
             </Link>
-            <button onClick={clearCart} style={{
-              backgroundColor: "var(--brick)",
-              color: "var(--white)",
-              border: "none",
-              padding: "0.7rem 1.5rem",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              transition: "background-color 0.3s ease",
-            }}>
+            <button
+              onClick={clearCart}
+              style={{
+                backgroundColor: "var(--brick)",
+                color: "var(--white)",
+                border: "none",
+                padding: "0.7rem 1.5rem",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                transition: "background-color 0.3s ease",
+              }}
+            >
               Limpiar carrito
+            </button>
+            <button
+              onClick={handleSendOrder}
+              style={{
+                backgroundColor: "var(--gold)",
+                color: "var(--white)",
+                border: "none",
+                padding: "0.7rem 1.5rem",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                transition: "background-color 0.3s ease",
+              }}
+            >
+              Enviar pedido
             </button>
           </div>
         </>
