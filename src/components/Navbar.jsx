@@ -4,75 +4,28 @@ import logo from "../assets/logo.png";
 
 const Navbar = () => {
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        backgroundColor: "var(--brick)",
-        padding: "0.8rem 2rem",
-        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-      }}
-    >
+    <nav className="flex justify-between items-center bg-brick px-8 py-4 shadow-md">
       <div>
-        <img
-          src={logo}
-          alt="Logo Mozo"
-          style={{ height: "40px" }}
-        />
+        <img src={logo} alt="Logo Mozo" className="h-10" />
       </div>
-      <div style={{ display: "flex", gap: "1rem" }}>
+      <div className="flex gap-4">
         <Link
           to="/"
-          style={{
-            textDecoration: "none",
-            color: "var(--gold)",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            padding: "0.5rem 1rem",
-            border: "1px solid var(--gold)",
-            borderRadius: "5px",
-            backgroundColor: "transparent",
-            cursor: "pointer",
-            textAlign: "center",
-          }}
+          className="text-gold text-sm font-bold px-4 py-2 border border-gold rounded-md hover:bg-gold hover:text-white transition"
         >
           Menú
         </Link>
         <Link
           to="/cart"
-          style={{
-            textDecoration: "none",
-            color: "var(--gold)",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            padding: "0.5rem 1rem",
-            border: "1px solid var(--gold)",
-            borderRadius: "5px",
-            backgroundColor: "transparent",
-            cursor: "pointer",
-            textAlign: "center",
-          }}
+          className="text-gold text-sm font-bold px-4 py-2 border border-gold rounded-md hover:bg-gold hover:text-white transition"
         >
           Carrito
         </Link>
-        {/* Nuevo botón Mozo */}
         <a
-          href="https://mozo-phi.vercel.app/" // Cambia esta URL cuando tengas el link final
+          href="https://mozo-phi.vercel.app/"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            textDecoration: "none",
-            color: "var(--gold)",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            padding: "0.5rem 1rem",
-            border: "1px solid var(--gold)",
-            borderRadius: "5px",
-            backgroundColor: "transparent",
-            cursor: "pointer",
-            textAlign: "center",
-          }}
+          className="text-gold text-sm font-bold px-4 py-2 border border-gold rounded-md hover:bg-gold hover:text-white transition"
         >
           MOZO
         </a>

@@ -1,12 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import ProductCard from "./ProductCard";
-import Notification from "./Notification";
 import { CartContext } from "../CartContext";
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
   const [notification, setNotification] = useState(null);
-  const { addToCart } = useContext(CartContext); // Usa el contexto del carrito
+  const { addToCart } = useContext(CartContext);
 
   const sheetId = "1sYejTzDsxt4ff9sw-7afhJ-FckfFBmwNZpUlsl59jgc";
   const apiKey = "AIzaSyDUZTIdv8SZ_ZdPEXpGx2yRhtthD_eYA70";
@@ -41,29 +39,38 @@ const Menu = () => {
   const handleAddToCart = (product) => {
     addToCart(product);
     setNotification(`¡${product.nombre} agregado al carrito!`);
+    setTimeout(() => setNotification(null), 3000);
   };
 
   return (
-    <div className="container">
-      <h2>Menú</h2>
-      <div className="grid">
+    <div className="container mx-auto px-4 py-8">
+      <h2 className="text-4xl font-bold text-center text-brick mb-8">Menú</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((product, index) => (
-          <ProductCard
+          <div
             key={index}
-            product={product}
-            onAddToCart={() => handleAddToCart(product)}
-          />
+            className="bg-brick-light text-white shadow-md rounded-lg p-6 flex flex-col items-center transition-transform transform hover:scale-105"
+          >
+            {/* Nombre y precio */}
+            <h3 className="text-xl font-bold mb-2">{product.nombre}</h3>
+            <p className="text-lg font-semibold mb-4">${product.precio}</p>
+            {/* Botón agregar */}
+            <button
+              onClick={() => handleAddToCart(product)}
+              className="bg-gold text-brick font-semibold px-4 py-2 rounded-lg hover:bg-brick hover:text-white transition-all"
+            >
+              Agregar al carrito
+            </button>
+          </div>
         ))}
       </div>
       {notification && (
-        <Notification
-          message={notification}
-          onClose={() => setNotification(null)}
-        />
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg">
+          {notification}
+        </div>
       )}
     </div>
   );
 };
-
 
 export default Menu;
