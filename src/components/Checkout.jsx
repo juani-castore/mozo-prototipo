@@ -11,6 +11,7 @@ const Checkout = () => {
     name: "",
     email: "",
     pickupTime: 0, // Default "Retirar ahora" as 0
+    comments: "", // New field for comments
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false); // Toggle for "Programar" option
@@ -59,6 +60,7 @@ const Checkout = () => {
         name: formData.name,
         email: formData.email,
         pickupTime: formData.pickupTime,
+        comments: formData.comments, // Add comments to the order
         total: calculateTotal(),
         items: cart.map((item) => ({
           nombre: item.nombre,
@@ -157,6 +159,19 @@ const Checkout = () => {
             />
           </div>
         )}
+        <div className="mb-4">
+          <label className="block text-sm font-bold mb-2 text-gray-700">
+            Comentarios
+          </label>
+          <textarea
+            name="comments"
+            value={formData.comments}
+            onChange={handleChange}
+            rows="4"
+            placeholder="¿Hay algo más que deberíamos saber sobre tu pedido?"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
+          ></textarea>
+        </div>
         <button
           type="submit"
           disabled={isLoading}
