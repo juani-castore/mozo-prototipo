@@ -85,21 +85,21 @@ const Cart = () => {
           <div className="text-center">
             <h3 className="text-2xl font-semibold text-brick">Total: ${calculateTotal()}</h3>
           </div>
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex flex-wrap gap-4 justify-center mt-6">
             <Link to="/checkout">
-              <button className="bg-green-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-green-700">
+              <button className="bg-green-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-green-700 w-full sm:w-auto">
                 Ir a pagar
               </button>
             </Link>
             <button
               onClick={clearCart}
-              className="bg-red-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-red-700"
+              className="bg-red-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-red-700 w-full sm:w-auto"
             >
               Limpiar carrito
             </button>
             <button
               onClick={handleSendOrder}
-              className="bg-gray-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-gray-700"
+              className="bg-gray-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-gray-700 w-full sm:w-auto"
             >
               Enviar pedido por WhatsApp
               <p className="text-xs text-white mt-1">(prototipo)</p>
@@ -114,4 +114,3 @@ const Cart = () => {
 };
 
 export default Cart;
-
