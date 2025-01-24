@@ -21,6 +21,12 @@ const Navbar = () => {
         >
           Carrito
         </Link>
+        <Link
+          to="/restaurante"
+          className="text-gold text-sm font-bold px-4 py-2 border border-gold rounded-md hover:bg-gold hover:text-white transition"
+        >
+          Restaurante
+        </Link>
         <a
           href="https://mozo-phi.vercel.app/"
           target="_blank"
