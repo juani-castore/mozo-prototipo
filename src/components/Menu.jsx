@@ -3,6 +3,8 @@ import { CartContext } from "../CartContext";
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
+  const [groupedProducts, setGroupedProducts] = useState({});
+  const [expanded, setExpanded] = useState({});
   const [notification, setNotification] = useState(null);
   const { addToCart } = useContext(CartContext);
 
@@ -13,7 +15,7 @@ const Menu = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:D100?key=${apiKey}`
+          `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:E100?key=${apiKey}`
         );
         const data = await response.json();
 
@@ -26,7 +28,18 @@ const Menu = () => {
               return acc;
             }, {})
           );
+
           setProducts(formattedData);
+
+          // Agrupar productos por categoría
+          const grouped = formattedData.reduce((acc, product) => {
+            const categoria = product.categoria || "Otros";
+            if (!acc[categoria]) acc[categoria] = [];
+            acc[categoria].push(product);
+            return acc;
+          }, {});
+
+          setGroupedProducts(grouped);
         }
       } catch (error) {
         console.error("Error al cargar los datos:", error);
@@ -42,28 +55,60 @@ const Menu = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const toggleExpand = (id) => {
+    setExpanded((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-8">
       <h2 className="text-4xl font-bold text-center text-brick mb-8">Menú</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.map((product, index) => (
-          <div
-            key={index}
-            className="bg-brick-light text-white shadow-md rounded-lg p-6 flex flex-col items-center transition-transform transform hover:scale-105"
-          >
-            {/* Nombre y precio */}
-            <h3 className="text-xl font-bold mb-2">{product.nombre}</h3>
-            <p className="text-lg font-semibold mb-4">${product.precio}</p>
-            {/* Botón agregar */}
-            <button
-              onClick={() => handleAddToCart(product)}
-              className="bg-gold text-brick font-semibold px-4 py-2 rounded-lg hover:bg-brick hover:text-white transition-all"
-            >
-              Agregar al carrito
-            </button>
+      {Object.keys(groupedProducts).map((categoria) => (
+        <div key={categoria} className="mb-12 w-full max-w-6xl">
+          <h3 className="text-2xl font-semibold text-brick mb-4 text-center uppercase">
+            {categoria}
+          </h3>
+          <div className="flex flex-wrap justify-center gap-6">
+            {groupedProducts[categoria].map((product, index) => (
+              <div
+                key={index}
+                className="bg-brick-light text-white shadow-md rounded-lg flex flex-col items-center transition-transform transform hover:scale-105 p-4"
+              >
+                <h3 className="text-lg font-bold mb-2 text-center">
+                  {product.nombre}
+                </h3>
+                <p className="text-md font-semibold mb-2 text-center">
+                  ${product.precio}
+                </p>
+                {/* Botón "Ver más" solo si hay descripción */}
+                {product.descripcion && (
+                  <>
+                    <button
+                      className="text-sm text-gold hover:text-white mb-2"
+                      onClick={() => toggleExpand(product.id)}
+                    >
+                      {expanded[product.id] ? "Ver menos" : "Ver más"}
+                    </button>
+                    {expanded[product.id] && (
+                      <p className="text-sm bg-white text-brick p-2 rounded-lg shadow-md w-full text-center">
+                        {product.descripcion}
+                      </p>
+                    )}
+                  </>
+                )}
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  className="bg-gold text-brick font-bold px-4 py-2 rounded-lg hover:bg-brick hover:text-white transition-all w-full"
+                >
+                  Agregar al carrito
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
       {notification && (
         <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg">
           {notification}
