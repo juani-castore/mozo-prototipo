@@ -15,7 +15,7 @@ const Menu = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:E100?key=${apiKey}`
+          `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:F100?key=${apiKey}`
         );
         const data = await response.json();
 
@@ -62,9 +62,64 @@ const Menu = () => {
     }));
   };
 
+  const destacados = products.filter((product) => product.destacado === "TRUE");
+  const regulares = products.filter((product) => product.destacado !== "TRUE");
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-8">
-      <h2 className="text-4xl font-bold text-center text-brick mb-8">Menú</h2>
+      <h1 className="text-5xl font-bold text-center text-brick mb-4">FUD TIME</h1>
+      <h2 className="text-4xl font-bold text-center text-brick mb-4">Menú</h2>
+      <button
+        className="bg-brick text-white font-bold px-6 py-3 rounded-lg hover:bg-brick-light transition-all mb-8"
+        onClick={() => window.location.href = "/cart"}
+      >
+        Ir al Carrito
+      </button>
+
+      {/* Mostrar destacados */}
+      {destacados.length > 0 && (
+        <div className="mb-12 w-full max-w-6xl">
+          <h3 className="text-2xl font-bold text-gold mb-4 text-center">Destacados</h3>
+          <div className="flex flex-wrap justify-center gap-6">
+            {destacados.map((product, index) => (
+              <div
+                key={index}
+                className="bg-gold text-brick shadow-md rounded-lg flex flex-col items-center transition-transform transform hover:scale-105 p-4 border-2 border-brick"
+              >
+                <h3 className="text-lg font-bold mb-2 text-center">
+                  {product.nombre}
+                </h3>
+                <p className="text-md font-semibold mb-2 text-center">
+                  ${product.precio}
+                </p>
+                {product.descripcion && (
+                  <>
+                    <button
+                      className="text-sm text-brick hover:text-white mb-2"
+                      onClick={() => toggleExpand(product.id)}
+                    >
+                      {expanded[product.id] ? "Ver menos" : "Ver más"}
+                    </button>
+                    {expanded[product.id] && (
+                      <p className="text-sm bg-white text-brick p-2 rounded-lg shadow-md w-full text-center">
+                        {product.descripcion}
+                      </p>
+                    )}
+                  </>
+                )}
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  className="bg-brick text-white font-bold px-4 py-2 rounded-lg hover:bg-brick-light transition-all w-full"
+                >
+                  Agregar al carrito
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Mostrar productos regulares */}
       {Object.keys(groupedProducts).map((categoria) => (
         <div key={categoria} className="mb-12 w-full max-w-6xl">
           <h3 className="text-2xl font-semibold text-brick mb-4 text-center uppercase">
@@ -82,7 +137,6 @@ const Menu = () => {
                 <p className="text-md font-semibold mb-2 text-center">
                   ${product.precio}
                 </p>
-                {/* Botón "Ver más" solo si hay descripción */}
                 {product.descripcion && (
                   <>
                     <button
@@ -109,6 +163,7 @@ const Menu = () => {
           </div>
         </div>
       ))}
+
       {notification && (
         <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg">
           {notification}
