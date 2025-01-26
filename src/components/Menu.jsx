@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Importar useNavigate
 import { CartContext } from "../CartContext";
 
 const Menu = () => {
@@ -10,6 +11,7 @@ const Menu = () => {
 
   const sheetId = "1sYejTzDsxt4ff9sw-7afhJ-FckfFBmwNZpUlsl59jgc";
   const apiKey = "AIzaSyDUZTIdv8SZ_ZdPEXpGx2yRhtthD_eYA70";
+  const navigate = useNavigate(); // Hook para navegación interna
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,7 +65,6 @@ const Menu = () => {
   };
 
   const destacados = products.filter((product) => product.destacado === "TRUE");
-  const regulares = products.filter((product) => product.destacado !== "TRUE");
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-8">
@@ -71,7 +72,7 @@ const Menu = () => {
       <h2 className="text-4xl font-bold text-center text-brick mb-4">Menú</h2>
       <button
         className="bg-brick text-white font-bold px-6 py-3 rounded-lg hover:bg-brick-light transition-all mb-8"
-        onClick={() => window.location.href = "/cart"}
+        onClick={() => navigate("/cart")} // Usar navigate para ir al carrito
       >
         Ir al Carrito
       </button>
@@ -119,7 +120,7 @@ const Menu = () => {
         </div>
       )}
 
-      {/* Mostrar productos regulares */}
+      {/* Productos regulares */}
       {Object.keys(groupedProducts).map((categoria) => (
         <div key={categoria} className="mb-12 w-full max-w-6xl">
           <h3 className="text-2xl font-semibold text-brick mb-4 text-center uppercase">
