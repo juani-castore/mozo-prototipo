@@ -13,11 +13,9 @@ const RestauranteLogin = () => {
     const auth = getAuth();
 
     try {
-      // Intenta iniciar sesión con el correo y la contraseña
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/restaurante/pedidos"); // Redirige a la página de pedidos si el login es exitoso
+      navigate("/restaurante/dashboard"); // ruta intermedia nueva
     } catch (err) {
-      // Maneja errores de inicio de sesión
       setError("Error al iniciar sesión. Verifica tus credenciales.");
     }
   };

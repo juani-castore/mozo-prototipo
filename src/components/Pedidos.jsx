@@ -64,6 +64,7 @@ const Pedidos = () => {
   }
 
   const pendingOrders = orders.filter((order) => order.status === "pendiente");
+  const preparedOrders = orders.filter((order) => order.status === "preparado");
   const deliveredOrders = orders
     .filter((order) => order.status === "entregado")
     .sort((a, b) => b.orderId - a.orderId);
@@ -81,22 +82,25 @@ const Pedidos = () => {
             {pendingOrders.map((order) => (
               <div key={order.id} className="p-4 bg-white shadow rounded-lg border border-gray-200">
                 <h3 className="text-xl font-semibold text-brick mb-2">Pedido #{order.orderId}</h3>
-                <p className="text-gray-700 mb-1"><strong>Nombre:</strong> {order.name}</p>
-                <p className="text-gray-700 mb-1"><strong>Email:</strong> {order.email}</p>
-                <p className="text-gray-700 mb-1"><strong>Total:</strong> ${order.total}</p>
-                <p className="text-gray-700 mb-1">
-                  <strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}
-                </p>
-                <p className="text-gray-700 mb-1"><strong>Fecha y Hora Pedido:</strong> {order.timeSubmitted}</p>
-                <p className="text-gray-700 mb-1"><strong>Comentarios:</strong> {order.comments}</p>
-                <div className="mt-2">
-                  <strong>Items:</strong>
-                  {order.items.map((item, index) => (
-                    <div key={index} className="ml-2 text-gray-600">
-                      • {item.nombre} (x{item.cantidad}) - ${item.precio}
-                    </div>
-                  ))}
-                </div>
+                <p><strong>Nombre:</strong> {order.name}</p>
+                <p><strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mb-8">
+        <h3 className="text-2xl font-semibold text-blue-600 mb-4">Pedidos Preparados</h3>
+        {preparedOrders.length === 0 ? (
+          <p className="text-center text-gray-600">No hay pedidos preparados.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {preparedOrders.map((order) => (
+              <div key={order.id} className="p-4 bg-blue-100 shadow rounded-lg border border-gray-200">
+                <h3 className="text-xl font-semibold text-blue-700 mb-2">Pedido #{order.orderId}</h3>
+                <p><strong>Nombre:</strong> {order.name}</p>
+                <p><strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}</p>
                 <button
                   onClick={() => handleChangeStatus(order.id, "entregado")}
                   className="w-full bg-green-500 text-white py-2 rounded mt-4 hover:bg-green-600"
@@ -118,22 +122,8 @@ const Pedidos = () => {
             {deliveredOrders.map((order) => (
               <div key={order.id} className="p-4 bg-green-100 shadow rounded-lg border border-gray-200">
                 <h3 className="text-xl font-semibold text-green-700 mb-2">Pedido #{order.orderId}</h3>
-                <p className="text-gray-700 mb-1"><strong>Nombre:</strong> {order.name}</p>
-                <p className="text-gray-700 mb-1"><strong>Email:</strong> {order.email}</p>
-                <p className="text-gray-700 mb-1"><strong>Total:</strong> ${order.total}</p>
-                <p className="text-gray-700 mb-1">
-                  <strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}
-                </p>
-                <p className="text-gray-700 mb-1"><strong>Fecha y Hora Pedido:</strong> {order.timeSubmitted}</p>
-                <p className="text-gray-700 mb-1"><strong>Comentarios:</strong> {order.comments}</p>
-                <div className="mt-2">
-                  <strong>Items:</strong>
-                  {order.items.map((item, index) => (
-                    <div key={index} className="ml-2 text-gray-600">
-                      • {item.nombre} (x{item.cantidad}) - ${item.precio}
-                    </div>
-                  ))}
-                </div>
+                <p><strong>Nombre:</strong> {order.name}</p>
+                <p><strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}</p>
               </div>
             ))}
           </div>

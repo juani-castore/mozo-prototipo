@@ -7,6 +7,8 @@ import Checkout from "./components/Checkout";
 import OrderConfirmation from "./components/OrderConfirmation";
 import RestauranteLogin from "./components/RestauranteLogin";
 import Pedidos from "./components/Pedidos";
+import CocinaDashboard from "./components/CocinaDashboard";
+import RestauranteDashboard from "./components/RestauranteDashboard";
 
 function App() {
   const [cart, setCart] = useState(() => {
@@ -27,7 +29,9 @@ function App() {
         <Route path="/checkout" element={<Checkout cart={cart} />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
         <Route path="/restaurante" element={<RestauranteLogin />} />
+        <Route path="/restaurante/dashboard" element={<RestauranteDashboard />} />
         <Route path="/restaurante/pedidos" element={<Pedidos />} />
+        <Route path="/restaurante/cocina" element={<CocinaDashboard />} />
       </Routes>
     </Router>
   );
