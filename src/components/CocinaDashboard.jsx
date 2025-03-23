@@ -9,7 +9,7 @@ const CocinaDashboard = () => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
-      collection(db, 'pedidos'),
+      collection(db, 'orders'),
       (snapshot) => {
         const fetchedOrders = snapshot.docs.map((doc) => {
           const data = doc.data();
@@ -43,7 +43,7 @@ const CocinaDashboard = () => {
 
   const handleChangeStatus = async (id, newStatus) => {
     try {
-      await updateDoc(doc(db, 'pedidos', id), { status: newStatus });
+      await updateDoc(doc(db, 'orders', id), { status: newStatus });
     } catch (error) {
       console.error('Error al actualizar estado:', error);
     }

@@ -9,7 +9,7 @@ const Pedidos = () => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
-      collection(db, "pedidos"),
+      collection(db, "orders"),
       (snapshot) => {
         const fetchedOrders = snapshot.docs.map((doc) => {
           const data = doc.data();
@@ -48,7 +48,7 @@ const Pedidos = () => {
 
   const handleChangeStatus = async (id, newStatus) => {
     try {
-      const orderRef = doc(db, "pedidos", id);
+      const orderRef = doc(db, "orders", id);
       await updateDoc(orderRef, { status: newStatus });
     } catch (error) {
       console.error("Error al actualizar el estado del pedido:", error);

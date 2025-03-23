@@ -3,19 +3,20 @@ import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBboe4dSO51doXv6sqcST6eKx0zXq72erU",
-  authDomain: "mozo-ai.firebaseapp.com",
-  projectId: "mozo-ai",
-  storageBucket: "mozo-ai.firebasestorage.app",
-  messagingSenderId: "62531286386",
-  appId: "1:62531286386:web:c4513c3b441a698d28d9eb",
-  measurementId: "G-HJEZ98CVHW",
+  apiKey: "AIzaSyAu-R7BFVjWO9kXadUcuxwtds5x7S50BFA",
+  authDomain: "prototipo-mozo.firebaseapp.com",
+  projectId: "prototipo-mozo",
+  storageBucket: "prototipo-mozo.appspot.com",
+  messagingSenderId: "526254713949",
+  appId: "1:526254713949:web:500f952641f89f769531b4",
+  measurementId: "G-K7QEYLK4WS",
 };
 
-// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app); // Inicializa Firestore
-const analytics = getAnalytics(app); // Inicializa Analytics
 
-// Exporta db y analytics por separado
+// ❌ No agregar host/ssl aquí
+const db = getFirestore(app);
+
+const analytics = getAnalytics(app);
+
 export { db, analytics };

@@ -1,82 +1,120 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../CartContext";
-import { collection, addDoc, doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  setDoc,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
+
 
 const Checkout = () => {
   const { cart, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
+
+  // Test de conexión a Firestore
+const testFirestore = async () => {
+  try {
+    const docRef = await addDoc(collection(db, "test"), {
+      nombre: "Juan",
+      creado: new Date().toISOString(),
+    });
+    console.log("✅ Documento creado con ID:", docRef.id);
+    alert("✅ Firestore conectado correctamente. ID: " + docRef.id);
+  } catch (err) {
+    console.error("❌ Error en testFirestore:", err);
+    alert("❌ Error al conectar con Firestore. Revisá la consola.");
+  }
+};
+
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    pickupTime: 0, // Default "Retirar ahora" as 0
-    comments: "", // New field for comments
+    pickupTime: 0,
+    comments: "",
   });
+
   const [isLoading, setIsLoading] = useState(false);
-  const [isScheduling, setIsScheduling] = useState(false); // Toggle for "Programar" option
+  const [isScheduling, setIsScheduling] = useState(false);
 
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + item.precio * item.quantity, 0);
+    return cart.reduce(
+      (total, item) => total + item.precio * item.quantity,
+      0
+    );
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePickupTimeChange = (e) => {
-    setFormData({ ...formData, pickupTime: e.target.value });
+    setFormData((prev) => ({ ...prev, pickupTime: e.target.value }));
   };
 
   const toggleScheduling = () => {
-    setIsScheduling(!isScheduling);
-    setFormData({ ...formData, pickupTime: isScheduling ? 0 : "" }); // Reset pickupTime on toggle
+    setIsScheduling((prev) => !prev);
+    setFormData((prev) => ({
+      ...prev,
+      pickupTime: isScheduling ? 0 : "",
+    }));
   };
 
   const getNextOrderId = async () => {
-    const counterDocRef = doc(db, "counters", "orders");
-    const counterDoc = await getDoc(counterDocRef);
+    const counterRef = doc(db, "counters", "orders");
 
-    if (counterDoc.exists()) {
-      const currentId = counterDoc.data().lastId;
-      await updateDoc(counterDocRef, { lastId: currentId + 1 });
-      return currentId + 1;
-    } else {
-      await setDoc(counterDocRef, { lastId: 1 });
-      return 1;
+    try {
+      const counterSnap = await getDoc(counterRef);
+
+      if (counterSnap.exists()) {
+        const current = counterSnap.data().lastId;
+        await updateDoc(counterRef, { lastId: current + 1 });
+        return current + 1;
+      } else {
+        await setDoc(counterRef, { lastId: 1 });
+        return 1;
+      }
+    } catch (error) {
+      console.error("Error al obtener el ID de pedido:", error);
+      throw error;
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const timeSubmitted = new Date().toLocaleString();
-
     setIsLoading(true);
+
     try {
       const orderId = await getNextOrderId();
+
       const order = {
         orderId,
         name: formData.name,
         email: formData.email,
         pickupTime: formData.pickupTime,
-        comments: formData.comments, // Add comments to the order
+        comments: formData.comments,
         total: calculateTotal(),
-        items: cart.map((item) => ({
-          nombre: item.nombre,
-          cantidad: item.quantity,
-          precio: item.precio,
+        items: cart.map(({ nombre, quantity, precio }) => ({
+          nombre,
+          cantidad: quantity,
+          precio,
         })),
-        timeSubmitted,
+        timeSubmitted: new Date().toLocaleString(),
         status: "pendiente",
       };
 
-      await addDoc(collection(db, "pedidos"), order);
+      await addDoc(collection(db, "orders"), order);
       clearCart();
       navigate("/order-confirmation", { state: { order } });
     } catch (error) {
-      console.error("Error al guardar el pedido: ", error);
-      alert("Error al procesar el pedido. Intente nuevamente.");
+      console.error("Error al guardar el pedido:", error);
+      alert("No se pudo procesar el pedido. Intente más tarde.");
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +122,9 @@ const Checkout = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold text-center text-brick mb-8">Formulario de Pedido</h2>
+      <h2 className="text-3xl font-bold text-center text-brick mb-8">
+        Formulario de Pedido
+      </h2>
       <form
         onSubmit={handleSubmit}
         className="max-w-lg mx-auto bg-white shadow-lg p-6 rounded-lg"
@@ -102,6 +142,7 @@ const Checkout = () => {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
           />
         </div>
+
         <div className="mb-4">
           <label className="block text-sm font-bold mb-2 text-gray-700">
             Correo electrónico
@@ -115,6 +156,7 @@ const Checkout = () => {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
           />
         </div>
+
         <div className="mb-4">
           <label className="block text-sm font-bold mb-2 text-gray-700">
             Hora de retiro
@@ -144,6 +186,7 @@ const Checkout = () => {
             </button>
           </div>
         </div>
+
         {isScheduling && (
           <div className="mt-4">
             <label className="block text-sm font-bold mb-2 text-gray-700">
@@ -159,6 +202,7 @@ const Checkout = () => {
             />
           </div>
         )}
+
         <div className="mb-4">
           <label className="block text-sm font-bold mb-2 text-gray-700">
             Comentarios
@@ -172,6 +216,7 @@ const Checkout = () => {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
           ></textarea>
         </div>
+
         <button
           type="submit"
           disabled={isLoading}
@@ -180,7 +225,20 @@ const Checkout = () => {
           {isLoading ? "Procesando..." : "Confirmar Pedido"}
         </button>
       </form>
+      {import.meta.env.DEV && (
+  <div className="mt-4 text-center">
+    <button
+      onClick={testFirestore}
+      type="button"
+      className="text-xs text-blue-600 underline"
+    >
+      Probar conexión con Firestore
+    </button>
+  </div>
+)}
+
     </div>
+    
   );
 };
 
