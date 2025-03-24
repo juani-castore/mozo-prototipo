@@ -48,84 +48,80 @@ const Pedidos = () => {
 
   const handleChangeStatus = async (id, newStatus) => {
     try {
-      const orderRef = doc(db, "orders", id);
-      await updateDoc(orderRef, { status: newStatus });
+      await updateDoc(doc(db, "orders", id), { status: newStatus });
     } catch (error) {
       console.error("Error al actualizar el estado del pedido:", error);
     }
   };
 
-  if (loading) {
-    return <p className="text-center text-gray-600">Cargando pedidos...</p>;
-  }
+  if (loading) return <p className="text-center text-gray-600">Cargando pedidos...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
-  if (error) {
-    return <p className="text-center text-red-500">{error}</p>;
-  }
+  const pendingOrders = orders.filter(order => order.status === "pendiente");
+  const preparedOrders = orders.filter(order => order.status === "preparado");
+  const deliveredOrders = orders.filter(order => order.status === "entregado").sort((a, b) => b.orderId - a.orderId);
 
-  const pendingOrders = orders.filter((order) => order.status === "pendiente");
-  const preparedOrders = orders.filter((order) => order.status === "preparado");
-  const deliveredOrders = orders
-    .filter((order) => order.status === "entregado")
-    .sort((a, b) => b.orderId - a.orderId);
+  const renderOrderCard = (order, showDeliverButton = false) => (
+    <div key={order.id} className="p-4 bg-white shadow rounded-lg border border-gray-200">
+      <h3 className="text-xl font-semibold mb-2">Pedido #{order.orderId}</h3>
+      <p><strong>Nombre:</strong> {order.name}</p>
+      <p><strong>Email:</strong> {order.email}</p>
+      <p><strong>Total:</strong> ${order.total.toFixed(2)}</p>
+      <p><strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}</p>
+      <p><strong>Enviado a las:</strong> {order.timeSubmitted}</p>
+      <p><strong>Comentarios:</strong> {order.comments}</p>
+      <div className="mt-2">
+        <strong>Items:</strong>
+        <ul className="list-disc pl-5">
+          {order.items.map((item, index) => (
+            <li key={index}>{item.nombre} (x{item.cantidad})</li>
+          ))}
+        </ul>
+      </div>
+      {showDeliverButton && (
+        <button
+          onClick={() => handleChangeStatus(order.id, "entregado")}
+          className="w-full bg-green-500 text-white py-2 rounded mt-4 hover:bg-green-600"
+        >
+          Marcar como Entregado
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold text-center text-brick mb-8">Pedidos Activos</h2>
+      <h2 className="text-3xl font-bold text-center mb-8">Pedidos Activos</h2>
 
       <section className="mb-8">
-        <h3 className="text-2xl font-semibold text-red-600 mb-4">Pedidos Pendientes</h3>
+        <h3 className="text-2xl font-semibold text-red-600 mb-4">Pendientes</h3>
         {pendingOrders.length === 0 ? (
           <p className="text-center text-gray-600">No hay pedidos pendientes.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pendingOrders.map((order) => (
-              <div key={order.id} className="p-4 bg-white shadow rounded-lg border border-gray-200">
-                <h3 className="text-xl font-semibold text-brick mb-2">Pedido #{order.orderId}</h3>
-                <p><strong>Nombre:</strong> {order.name}</p>
-                <p><strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}</p>
-              </div>
-            ))}
+            {pendingOrders.map(order => renderOrderCard(order))}
           </div>
         )}
       </section>
 
       <section className="mb-8">
-        <h3 className="text-2xl font-semibold text-blue-600 mb-4">Pedidos Preparados</h3>
+        <h3 className="text-2xl font-semibold text-blue-600 mb-4">Preparados</h3>
         {preparedOrders.length === 0 ? (
           <p className="text-center text-gray-600">No hay pedidos preparados.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {preparedOrders.map((order) => (
-              <div key={order.id} className="p-4 bg-blue-100 shadow rounded-lg border border-gray-200">
-                <h3 className="text-xl font-semibold text-blue-700 mb-2">Pedido #{order.orderId}</h3>
-                <p><strong>Nombre:</strong> {order.name}</p>
-                <p><strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}</p>
-                <button
-                  onClick={() => handleChangeStatus(order.id, "entregado")}
-                  className="w-full bg-green-500 text-white py-2 rounded mt-4 hover:bg-green-600"
-                >
-                  Marcar como Entregado
-                </button>
-              </div>
-            ))}
+            {preparedOrders.map(order => renderOrderCard(order, true))}
           </div>
         )}
       </section>
 
       <section>
-        <h3 className="text-2xl font-semibold text-green-600 mb-4">Pedidos Entregados</h3>
+        <h3 className="text-2xl font-semibold text-green-600 mb-4">Entregados</h3>
         {deliveredOrders.length === 0 ? (
           <p className="text-center text-gray-600">No hay pedidos entregados.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {deliveredOrders.map((order) => (
-              <div key={order.id} className="p-4 bg-green-100 shadow rounded-lg border border-gray-200">
-                <h3 className="text-xl font-semibold text-green-700 mb-2">Pedido #{order.orderId}</h3>
-                <p><strong>Nombre:</strong> {order.name}</p>
-                <p><strong>Hora de Retiro:</strong> {order.pickupTime === "0" ? "Retirar Ahora" : order.pickupTime}</p>
-              </div>
-            ))}
+            {deliveredOrders.map(order => renderOrderCard(order))}
           </div>
         )}
       </section>

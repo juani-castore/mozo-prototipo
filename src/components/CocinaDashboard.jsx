@@ -5,7 +5,6 @@ import { db } from '../firebaseConfig';
 const CocinaDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -25,7 +24,7 @@ const CocinaDashboard = () => {
 
         fetchedOrders.sort((a, b) => {
           const timeA = a.pickupTime === '0' ? '00:00' : a.pickupTime;
-          const timeB = b.pickupTime || '0';
+          const timeB = b.pickupTime === '0' ? '00:00' : b.pickupTime;
           return timeA.localeCompare(timeB);
         });
 
