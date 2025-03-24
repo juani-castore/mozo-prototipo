@@ -5,6 +5,9 @@ const mercadopago = require("mercadopago");
 // 🔐 Tokens y URLs guardados como secretos en Firebase
 const MP_ACCESS_TOKEN = defineSecret("MP_ACCESS_TOKEN");
 const FRONTEND_BASE_URL = defineSecret("FRONTEND_BASE_URL");
+const baseUrl = FRONTEND_BASE_URL.value();
+console.log("🌐 baseUrl usado:", baseUrl);
+
 
 exports.generarLinkDePago = onCall(
   { secrets: [MP_ACCESS_TOKEN, FRONTEND_BASE_URL] },
