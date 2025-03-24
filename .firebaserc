@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "prototipo-mozo"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }

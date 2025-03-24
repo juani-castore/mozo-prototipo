@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAu-R7BFVjWO9kXadUcuxwtds5x7S50BFA",
@@ -14,9 +15,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// ❌ No agregar host/ssl aquí
 const db = getFirestore(app);
-
 const analytics = getAnalytics(app);
+const functions = getFunctions(app);
 
-export { db, analytics };
+export { db, analytics, functions };

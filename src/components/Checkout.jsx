@@ -9,28 +9,29 @@ import {
   updateDoc,
   setDoc,
 } from "firebase/firestore";
-import { db } from "../firebaseConfig";
-
+import { db, functions } from "../firebaseConfig";
+import { httpsCallable } from "firebase/functions";
 
 const Checkout = () => {
+
+
+
   const { cart, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
 
-  // Test de conexión a Firestore
-const testFirestore = async () => {
-  try {
-    const docRef = await addDoc(collection(db, "test"), {
-      nombre: "Juan",
-      creado: new Date().toISOString(),
-    });
-    console.log("✅ Documento creado con ID:", docRef.id);
-    alert("✅ Firestore conectado correctamente. ID: " + docRef.id);
-  } catch (err) {
-    console.error("❌ Error en testFirestore:", err);
-    alert("❌ Error al conectar con Firestore. Revisá la consola.");
-  }
-};
-
+  const testFirestore = async () => {
+    try {
+      const docRef = await addDoc(collection(db, "test"), {
+        nombre: "Juan",
+        creado: new Date().toISOString(),
+      });
+      console.log("✅ Documento creado con ID:", docRef.id);
+      alert("✅ Firestore conectado correctamente. ID: " + docRef.id);
+    } catch (err) {
+      console.error("❌ Error en testFirestore:", err);
+      alert("❌ Error al conectar con Firestore. Revisá la consola.");
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -41,13 +42,6 @@ const testFirestore = async () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
-
-  const calculateTotal = () => {
-    return cart.reduce(
-      (total, item) => total + item.precio * item.quantity,
-      0
-    );
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,55 +60,47 @@ const testFirestore = async () => {
     }));
   };
 
-  const getNextOrderId = async () => {
-    const counterRef = doc(db, "counters", "orders");
-
-    try {
-      const counterSnap = await getDoc(counterRef);
-
-      if (counterSnap.exists()) {
-        const current = counterSnap.data().lastId;
-        await updateDoc(counterRef, { lastId: current + 1 });
-        return current + 1;
-      } else {
-        await setDoc(counterRef, { lastId: 1 });
-        return 1;
-      }
-    } catch (error) {
-      console.error("Error al obtener el ID de pedido:", error);
-      throw error;
-    }
-  };
-
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     setIsLoading(true);
 
+    if (cart.length === 0) {
+      alert("Tu carrito está vacío.");
+      return;
+    }
+    
+
     try {
-      const orderId = await getNextOrderId();
+      const carritoMP = cart.map((item) => ({
+        nombre: item.nombre,
+        precio: Number(item.precio),
+        quantity: Number(item.quantity),
+      }));
 
-      const order = {
-        orderId,
-        name: formData.name,
+      const generarLinkDePago = httpsCallable(functions, "generarLinkDePago");
+      const response = await generarLinkDePago({
+        nombre: formData.name,
         email: formData.email,
-        pickupTime: formData.pickupTime,
-        comments: formData.comments,
-        total: calculateTotal(),
-        items: cart.map(({ nombre, quantity, precio }) => ({
-          nombre,
-          cantidad: quantity,
-          precio,
-        })),
-        timeSubmitted: new Date().toLocaleString(),
-        status: "pendiente",
-      };
+        carrito: carritoMP,
+      });
+      
 
-      await addDoc(collection(db, "orders"), order);
-      clearCart();
-      navigate("/order-confirmation", { state: { order } });
+      localStorage.setItem(
+        "orderData",
+        JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          pickupTime: formData.pickupTime,
+          comments: formData.comments,
+          cart,
+        })
+      );
+
+      window.location.href = response.data.init_point;
     } catch (error) {
-      console.error("Error al guardar el pedido:", error);
-      alert("No se pudo procesar el pedido. Intente más tarde.");
+      console.error("Error al generar el link de pago:", error);
+      alert("No se pudo procesar el pago. Intente más tarde.");
     } finally {
       setIsLoading(false);
     }
@@ -225,20 +211,19 @@ const testFirestore = async () => {
           {isLoading ? "Procesando..." : "Confirmar Pedido"}
         </button>
       </form>
-      {import.meta.env.DEV && (
-  <div className="mt-4 text-center">
-    <button
-      onClick={testFirestore}
-      type="button"
-      className="text-xs text-blue-600 underline"
-    >
-      Probar conexión con Firestore
-    </button>
-  </div>
-)}
 
+      {import.meta.env.DEV && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={testFirestore}
+            type="button"
+            className="text-xs text-blue-600 underline"
+          >
+            Probar conexión con Firestore
+          </button>
+        </div>
+      )}
     </div>
-    
   );
 };
 
