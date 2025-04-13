@@ -1,5 +1,8 @@
+// Menu.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 import { CartContext } from "../CartContext";
 
 const Menu = () => {
@@ -8,54 +11,55 @@ const Menu = () => {
   const [expanded, setExpanded] = useState({});
   const [notification, setNotification] = useState(null);
   const { addToCart } = useContext(CartContext);
-
-  const sheetId = "1sYejTzDsxt4ff9sw-7afhJ-FckfFBmwNZpUlsl59jgc";
-  const apiKey = "AIzaSyDUZTIdv8SZ_ZdPEXpGx2yRhtthD_eYA70";
   const navigate = useNavigate();
 
+  // 1. Carga los datos de la colección "menu" en Firestore
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:F100?key=${apiKey}`
-        );
-        const data = await response.json();
+        const querySnapshot = await getDocs(collection(db, "menu"));
+        const items = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        
+        // [DEBUG] Muestra en consola lo que obtuviste de Firestore
+        console.log("Items desde Firestore:", items);
 
-        if (data.values) {
-          const headers = data.values[0];
-          const rows = data.values.slice(1);
-          const formattedData = rows.map((row) =>
-            headers.reduce((acc, header, index) => {
-              acc[header.toLowerCase()] = row[index];
-              return acc;
-            }, {})
-          );
+        setProducts(items);
 
-          setProducts(formattedData);
+        // Agrupa los productos por categoría
+        const grouped = items.reduce((acc, product) => {
+          const cat = product.category || "Otros";
+          if (!acc[cat]) acc[cat] = [];
+          acc[cat].push(product);
+          return acc;
+        }, {});
 
-          const grouped = formattedData.reduce((acc, product) => {
-            const categoria = product.categoria || "Otros";
-            if (!acc[categoria]) acc[categoria] = [];
-            acc[categoria].push(product);
-            return acc;
-          }, {});
-
-          setGroupedProducts(grouped);
-        }
+        setGroupedProducts(grouped);
       } catch (error) {
-        console.error("Error al cargar los datos:", error);
+        console.error("Error al cargar el menú desde Firestore:", error);
       }
     };
 
     fetchData();
   }, []);
 
+  // 2. Agregar producto al carrito, con un aviso de notificación
   const handleAddToCart = (product) => {
-    addToCart(product);
-    setNotification(`¡${product.nombre} agregado al carrito!`);
+    // [DEBUG] Ver qué producto se agrega al carrito
+    console.log("Producto que se agrega al carrito:", product);
+
+    if (product.stock > 0) {
+      addToCart(product);
+      setNotification(`¡${product.name} agregado al carrito!`);
+    } else {
+      setNotification(`Lo sentimos, ${product.name} está agotado.`);
+    }
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // 3. Mostrar/ocultar descripción (acordeón simple)
   const toggleExpand = (id) => {
     setExpanded((prev) => ({
       ...prev,
@@ -63,13 +67,17 @@ const Menu = () => {
     }));
   };
 
-  const destacados = products.filter((product) => product.destacado === "TRUE");
+  // 4. Filtrar los productos recomendados
+  const recommendedProducts = products.filter(
+    (product) => product.recomended === true
+  );
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-8">
       <h1 className="text-5xl font-bold text-center text-brick mb-4">FUD TIME</h1>
       <h2 className="text-4xl font-bold text-center text-brick mb-4">Menú</h2>
 
+      {/* Botón para ir al carrito */}
       <button
         className="fixed bottom-4 right-4 z-50 bg-brick text-white font-bold px-6 py-3 rounded-lg hover:bg-brick-light shadow-lg"
         onClick={() => navigate("/cart")}
@@ -77,18 +85,19 @@ const Menu = () => {
         Ir al Carrito
       </button>
 
-      {destacados.length > 0 && (
+      {/* Sección de productos recomendados (opcional) */}
+      {recommendedProducts.length > 0 && (
         <div className="mb-12 w-full max-w-6xl">
-          <h3 className="text-2xl font-bold text-gold mb-4 text-center">Destacados</h3>
+          <h3 className="text-2xl font-bold text-gold mb-4 text-center">Recomendados</h3>
           <div className="flex flex-wrap justify-center gap-6">
-            {destacados.map((product, index) => (
+            {recommendedProducts.map((product) => (
               <div
-                key={index}
+                key={product.id}
                 className="bg-gold text-brick shadow-md rounded-lg flex flex-col items-center transition-transform transform hover:scale-105 p-4 border-2 border-brick"
               >
-                <h3 className="text-lg font-bold mb-2 text-center">{product.nombre}</h3>
-                <p className="text-md font-semibold mb-2 text-center">${product.precio}</p>
-                {product.descripcion && (
+                <h3 className="text-lg font-bold mb-2 text-center">{product.name}</h3>
+                <p className="text-md font-semibold mb-2 text-center">${product.price}</p>
+                {product.description && (
                   <>
                     <button
                       className="text-sm text-brick hover:text-white mb-2"
@@ -98,7 +107,7 @@ const Menu = () => {
                     </button>
                     {expanded[product.id] && (
                       <p className="text-sm bg-white text-brick p-2 rounded-lg shadow-md w-full text-center">
-                        {product.descripcion}
+                        {product.description}
                       </p>
                     )}
                   </>
@@ -115,19 +124,35 @@ const Menu = () => {
         </div>
       )}
 
-      {Object.keys(groupedProducts).map((categoria) => (
-        <div key={categoria} className="mb-12 w-full max-w-6xl">
+      {/* Sección de productos agrupados por categoría */}
+      {Object.keys(groupedProducts).map((category) => (
+        <div key={category} className="mb-12 w-full max-w-6xl">
           <h3 className="text-2xl font-semibold text-brick mb-4 text-center uppercase">
-            {categoria}
+            {category}
           </h3>
           <div className="flex flex-wrap justify-center gap-6">
-            {groupedProducts[categoria].map((product, index) => (
+            {groupedProducts[category].map((product) => (
               <div
-                key={index}
+                key={product.id}
                 className="bg-brick-light text-white shadow-md rounded-lg flex flex-col items-center transition-transform transform hover:scale-105 p-4"
               >
-                <h3 className="text-lg font-bold mb-2 text-center">{product.nombre}</h3>
-                <p className="text-md font-semibold mb-2 text-center">${product.precio}</p>
+                <h3 className="text-lg font-bold mb-2 text-center">{product.name}</h3>
+                <p className="text-md font-semibold mb-2 text-center">${product.price}</p>
+                {product.description && (
+                  <>
+                    <button
+                      className="text-sm text-white hover:text-brick mb-2"
+                      onClick={() => toggleExpand(product.id)}
+                    >
+                      {expanded[product.id] ? "Ver menos" : "Ver más"}
+                    </button>
+                    {expanded[product.id] && (
+                      <p className="text-sm bg-white text-brick p-2 rounded-lg shadow-md w-full text-center">
+                        {product.description}
+                      </p>
+                    )}
+                  </>
+                )}
                 <button
                   onClick={() => handleAddToCart(product)}
                   className="bg-gold text-brick font-bold px-4 py-2 rounded-lg hover:bg-brick hover:text-white transition-all w-full"

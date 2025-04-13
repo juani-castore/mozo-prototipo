@@ -58,9 +58,9 @@ const OrderConfirmation = () => {
           comments: orderData.comments,
           total,
           items: orderData.cart.map((item) => ({
-            nombre: item.nombre,
-            cantidad: item.quantity,
-            precio: item.precio,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
           })),
           timeSubmitted: new Date().toLocaleString(),
           status: "pendiente",

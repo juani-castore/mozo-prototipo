@@ -1,90 +1,60 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../CartContext";
-import {
-  collection,
-  addDoc,
-  doc,
-  getDoc,
-  updateDoc,
-  setDoc,
-} from "firebase/firestore";
-import { db, functions } from "../firebaseConfig";
 import { httpsCallable } from "firebase/functions";
+import { functions } from "../firebaseConfig";
 
 const Checkout = () => {
-
-
-
-  const { cart, clearCart } = useContext(CartContext);
+  const { cart } = useContext(CartContext);
   const navigate = useNavigate();
-
-  const testFirestore = async () => {
-    try {
-      const docRef = await addDoc(collection(db, "test"), {
-        nombre: "Juan",
-        creado: new Date().toISOString(),
-      });
-      console.log("✅ Documento creado con ID:", docRef.id);
-      alert("✅ Firestore conectado correctamente. ID: " + docRef.id);
-    } catch (err) {
-      console.error("❌ Error en testFirestore:", err);
-      alert("❌ Error al conectar con Firestore. Revisá la consola.");
-    }
-  };
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    pickupTime: 0,
+    pickupTime: "",
     comments: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isScheduling, setIsScheduling] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePickupTimeChange = (e) => {
-    setFormData((prev) => ({ ...prev, pickupTime: e.target.value }));
-  };
-
-  const toggleScheduling = () => {
-    setIsScheduling((prev) => !prev);
-    setFormData((prev) => ({
-      ...prev,
-      pickupTime: isScheduling ? 0 : "",
-    }));
-  };
-
   const handleSubmit = async (e) => {
-    
     e.preventDefault();
     setIsLoading(true);
 
     if (cart.length === 0) {
       alert("Tu carrito está vacío.");
+      setIsLoading(false);
       return;
     }
-    
 
     try {
+      console.log("Carrito actual:", cart);
+
       const carritoMP = cart.map((item) => ({
-        nombre: item.nombre,
-        precio: Number(item.precio),
+        name: item.name,
+        price: Number(item.price),
         quantity: Number(item.quantity),
       }));
 
+      console.log("Carrito enviado a generarLinkDePago:", carritoMP);
+
+      if (!Array.isArray(carritoMP) || carritoMP.length === 0) {
+        console.error("El carrito no es un arreglo válido o está vacío:", carritoMP);
+        alert("El carrito no es válido. Por favor, revisa tu pedido.");
+        setIsLoading(false);
+        return;
+      }
+
       const generarLinkDePago = httpsCallable(functions, "generarLinkDePago");
       const response = await generarLinkDePago({
-        nombre: formData.name,
-        email: formData.email,
         carrito: carritoMP,
+        mesa: "Mesa 1", // Example metadata
       });
-      
 
       localStorage.setItem(
         "orderData",
@@ -128,7 +98,6 @@ const Checkout = () => {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
           />
         </div>
-
         <div className="mb-4">
           <label className="block text-sm font-bold mb-2 text-gray-700">
             Correo electrónico
@@ -142,53 +111,18 @@ const Checkout = () => {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
           />
         </div>
-
         <div className="mb-4">
           <label className="block text-sm font-bold mb-2 text-gray-700">
             Hora de retiro
           </label>
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              className={`flex-1 py-2 px-4 rounded-l-lg text-sm font-semibold ${
-                !isScheduling
-                  ? "bg-brick text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-              onClick={toggleScheduling}
-            >
-              Retirar ahora
-            </button>
-            <button
-              type="button"
-              className={`flex-1 py-2 px-4 rounded-r-lg text-sm font-semibold ${
-                isScheduling
-                  ? "bg-brick text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-              onClick={toggleScheduling}
-            >
-              Programar
-            </button>
-          </div>
+          <input
+            type="time"
+            name="pickupTime"
+            value={formData.pickupTime}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
+          />
         </div>
-
-        {isScheduling && (
-          <div className="mt-4">
-            <label className="block text-sm font-bold mb-2 text-gray-700">
-              Selecciona un horario
-            </label>
-            <input
-              type="time"
-              name="pickupTime"
-              value={formData.pickupTime}
-              onChange={handlePickupTimeChange}
-              required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
-            />
-          </div>
-        )}
-
         <div className="mb-4">
           <label className="block text-sm font-bold mb-2 text-gray-700">
             Comentarios
@@ -202,7 +136,6 @@ const Checkout = () => {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-brick-light"
           ></textarea>
         </div>
-
         <button
           type="submit"
           disabled={isLoading}
@@ -211,18 +144,6 @@ const Checkout = () => {
           {isLoading ? "Procesando..." : "Confirmar Pedido"}
         </button>
       </form>
-
-      {import.meta.env.DEV && (
-        <div className="mt-4 text-center">
-          <button
-            onClick={testFirestore}
-            type="button"
-            className="text-xs text-blue-600 underline"
-          >
-            Probar conexión con Firestore
-          </button>
-        </div>
-      )}
     </div>
   );
 };

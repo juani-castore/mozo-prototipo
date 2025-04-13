@@ -6,7 +6,15 @@ const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
 
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + item.precio * item.quantity, 0);
+    // Imprime en consola el precio y su tipo para cada producto
+    cart.forEach((item) => {
+      console.log(`Producto: ${item.name} - Price: ${item.price} (tipo: ${typeof item.price})`);
+    });
+    return cart.reduce((total, item) => {
+      // Si item.price es undefined o no es convertible, se usará 0
+      const itemPrice = parseFloat(item.price) || 0;
+      return total + itemPrice * item.quantity;
+    }, 0);
   };
 
   const handleIncrease = (productId) => {
@@ -23,28 +31,6 @@ const Cart = () => {
     }
   };
 
-  const generateOrderId = () => {
-    const words = ["sol", "luna", "estrella", "mar", "tierra", "viento", "fuego"];
-    return words[Math.floor(Math.random() * words.length)];
-  };
-
-  const handleSendOrder = () => {
-    const phoneNumber = "5493814023228";
-    const orderId = generateOrderId();
-    const orderDetails = cart
-      .map(
-        (item) =>
-          `- ${item.nombre} x ${item.quantity} ($${item.precio * item.quantity})`
-      )
-      .join("\n");
-    const total = calculateTotal();
-    const message = `Hola, quiero realizar el siguiente pedido:\n\n${orderDetails}\n\nTotal: $${total}\n\nMi identificador de pedido es: ${orderId}\n\nGracias.`;
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
-      message
-    )}`;
-    window.open(whatsappUrl, "_blank");
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-4xl font-bold text-center text-brick mb-8">Carrito</h2>
@@ -56,9 +42,11 @@ const Cart = () => {
               className="flex justify-between items-center bg-brick-light text-white p-4 rounded-lg shadow-md"
             >
               <div>
-                <h3 className="text-lg font-bold">{item.nombre}</h3>
+                <h3 className="text-lg font-bold">{item.name}</h3>
                 <p>Cantidad: {item.quantity}</p>
-                <p className="text-sm">Precio: ${item.precio * item.quantity}</p>
+                <p className="text-sm">
+                  Precio: ${ (parseFloat(item.price) || 0) * item.quantity }
+                </p>
               </div>
               <div className="flex items-center space-x-2">
                 <button
@@ -83,7 +71,9 @@ const Cart = () => {
             </div>
           ))}
           <div className="text-center">
-            <h3 className="text-2xl font-semibold text-brick">Total: ${calculateTotal()}</h3>
+            <h3 className="text-2xl font-semibold text-brick">
+              Total: ${calculateTotal()}
+            </h3>
           </div>
           <div className="flex flex-wrap justify-between items-center mt-6 space-x-4">
             <Link to="/checkout" className="flex-1">
@@ -96,12 +86,6 @@ const Cart = () => {
               className="bg-red-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-red-700 w-full flex-1"
             >
               Limpiar carrito
-            </button>
-            <button
-              onClick={handleSendOrder}
-              className="bg-gray-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-gray-700 w-full flex-1"
-            >
-              Enviar pedido por WhatsApp
             </button>
           </div>
         </div>
