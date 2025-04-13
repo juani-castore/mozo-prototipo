@@ -1,3 +1,4 @@
+// App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -9,8 +10,10 @@ import RestauranteLogin from "./components/RestauranteLogin";
 import Pedidos from "./components/Pedidos";
 import CocinaDashboard from "./components/CocinaDashboard";
 import RestauranteDashboard from "./components/RestauranteDashboard";
-import PaymentFailed from "./components/PaymentFailed";        // ⬅️ NUEVO
-import PaymentPending from "./components/PaymentPending";      // ⬅️ NUEVO
+import MenuDashboard from "./components/MenuDashboard"; // Nuevo componente para administrar el menú
+import PaymentFailed from "./components/PaymentFailed";
+import PaymentPending from "./components/PaymentPending";
+
 
 function App() {
   const [cart, setCart] = useState(() => {
@@ -36,6 +39,7 @@ function App() {
         <Route path="/restaurante/dashboard" element={<RestauranteDashboard />} />
         <Route path="/restaurante/pedidos" element={<Pedidos />} />
         <Route path="/restaurante/cocina" element={<CocinaDashboard />} />
+        <Route path="/restaurante/menu" element={<MenuDashboard />} />
       </Routes>
     </Router>
   );

@@ -1,54 +1,57 @@
-const { onCall } = require("firebase-functions/v2/https");
-const { defineSecret } = require("firebase-functions/params");
+// functions/index.js
+const functions = require("firebase-functions");
 const mercadopago = require("mercadopago");
 
-const MP_ACCESS_TOKEN = defineSecret("MP_ACCESS_TOKEN");
-const FRONTEND_BASE_URL = defineSecret("FRONTEND_BASE_URL");
+console.log("Redeploying...");
 
-exports.generarLinkDePago = onCall(
-  { secrets: [MP_ACCESS_TOKEN, FRONTEND_BASE_URL] },
-  async (data, context) => {
-    const payload = data?.data || {};
-    const { nombre, email, carrito } = payload;
+// Configura MercadoPago usando process.env (asegúrate de que MP_TOKEN esté definido en producción)
+mercadopago.configure({
+  access_token: process.env.MP_TOKEN,
+});
 
-    if (!carrito || !Array.isArray(carrito) || carrito.length === 0) {
-      console.error("❌ Carrito inválido:", carrito);
-      throw new Error("El carrito está vacío o mal formado.");
-    }
+exports.generarLinkDePago = functions.https.onCall(async (data, context) => {
+  console.log("[DEBUG] Data received:", data);
 
-    mercadopago.configure({
-      access_token: MP_ACCESS_TOKEN.value(),
-    });
+  const { carrito, mesa } = data.data;
 
-    const items = carrito.map((item) => ({
-      title: item.nombre,
-      quantity: Number(item.quantity),
-      unit_price: Number(item.precio),
-      currency_id: "ARS",
-    }));
+  console.log("[DEBUG] Carrito received:", carrito);
+  console.log("[DEBUG] Is carrito an array?", Array.isArray(carrito));
 
-    console.log("🧾 Items enviados a Mercado Pago:", items);
-
-    const baseUrl = FRONTEND_BASE_URL.value();
-    console.log("🌐 baseUrl usado:", baseUrl); // ✅ ahora sí funciona
-
-    try {
-      const preference = await mercadopago.preferences.create({
-        items,
-        payer: { name: nombre, email },
-        back_urls: {
-          success: `${baseUrl}/order-confirmation`,
-          failure: `${baseUrl}/payment-failed`,
-          pending: `${baseUrl}/payment-pending`,
-        },
-        auto_return: "approved",
-      });
-
-      console.log("✅ Preferencia creada:", preference.body.id);
-      return { init_point: preference.body.init_point };
-    } catch (error) {
-      console.error("❌ Error al crear preferencia:", error?.message || error);
-      throw new Error("No se pudo generar el link de pago.");
-    }
+  // Validate carrito
+  if (!carrito || !Array.isArray(carrito)) {
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "El carrito es obligatorio y debe ser un arreglo."
+    );
   }
-);
+
+  const preference = {
+    items: carrito.map((item) => ({
+      title: item.name,
+      quantity: item.quantity,
+      unit_price: Number(item.price),
+      currency_id: "ARS",
+    })),
+    back_urls: {
+        success: `${baseUrl}/order-confirmation`,
+        failure: `${baseUrl}/payment-failed`,
+        pending: `${baseUrl}/payment-pending`,
+    },
+    auto_return: "approved",
+    metadata: { mesa },
+  };
+
+  console.log("[DEBUG] Preferencia a MercadoPago:", preference);
+
+  try {
+    const responseMP = await mercadopago.preferences.create(preference);
+    console.log("[DEBUG] Respuesta de MercadoPago:", responseMP.body);
+    return { init_point: responseMP.body.init_point };
+  } catch (error) {
+    console.error("[DEBUG] Error creando preferencia:", error.response ? error.response.data : error.message);
+    throw new functions.https.HttpsError(
+      "internal",
+      "No se pudo crear el link de pago"
+    );
+  }
+});
