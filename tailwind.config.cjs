@@ -1,5 +1,9 @@
 module.exports = {
-  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"], // Escanea las rutas necesarias para Tailwind
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
+  ], // Escanea las rutas necesarias para Tailwind
   theme: {
     extend: {
       colors: {
