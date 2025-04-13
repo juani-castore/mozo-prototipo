@@ -516,10 +516,22 @@ const MenuDashboard = () => {
                     <p className="mt-2">Stock: {product.stock}</p>
                     {product.stockInicial && (
                       <div className="mt-2">
-                        <p className="text-sm text-gray-600">
-                          Stock Inicial:{" "}
-                          {JSON.stringify(product.stockInicial)}
-                        </p>
+                        <button
+                          onClick={(e) => {
+                            const target = e.target.nextSibling;
+                            target.style.display = target.style.display === "none" ? "block" : "none";
+                          }}
+                          className="text-blue-500 underline"
+                        >
+                          Ver Stock Inicial
+                        </button>
+                        <div style={{ display: "none" }} className="mt-2">
+                          {Object.entries(product.stockInicial).map(([day, value]) => (
+                            <p key={day} className="text-sm text-gray-600">
+                              {day.charAt(0).toUpperCase() + day.slice(1)}: {value}
+                            </p>
+                          ))}
+                        </div>
                       </div>
                     )}
                     {product.description && (
