@@ -1,41 +1,31 @@
-const functions = require("firebase-functions");
+// functions/index.js
+// require('dotenv').config();
+
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const mercadopago = require("mercadopago");
 
-// Inicializar Firebase Admin
 admin.initializeApp();
 const db = admin.firestore();
 
-// Leer variables de entorno de Firebase Functions config
-const getConfig = () => {
-  const cfg = functions.config();
-  return {
-    mpToken: cfg.mercadopago?.token,
-    baseUrl: cfg.app?.base_url,
-  };
-};
+const mpToken = process.env.MP_TOKEN;
+const baseUrl = process.env.BASE_URL;
 
-// Función para generar link de pago
-exports.generarLinkDePago = functions.https.onCall(async (data, context) => {
-  const { carrito, mesa } = data;
-  const { mpToken, baseUrl } = getConfig();
+exports.generarLinkDePago = onCall({ region: "us-central1" }, async (data) => {
+  const { carrito, mesa } = data.data;
 
   if (!mpToken) {
-    console.error("MP_TOKEN no configurado en Firebase Functions config");
-    throw new functions.https.HttpsError(
-      "failed-precondition",
-      "Token de MercadoPago no configurado."
-    );
+    console.error("MP_TOKEN no configurado en variables de entorno");
+    throw new HttpsError("failed-precondition", "Token de MercadoPago no configurado.");
   }
-
   mercadopago.configure({ access_token: mpToken });
 
   if (!Array.isArray(carrito)) {
-    throw new functions.https.HttpsError("invalid-argument", "Carrito inválido.");
+    throw new HttpsError("invalid-argument", "Carrito inválido.");
   }
 
   const preference = {
-    items: carrito.map(item => ({
+    items: carrito.map((item) => ({
       title: item.name,
       quantity: item.quantity,
       unit_price: Number(item.price),
@@ -55,49 +45,34 @@ exports.generarLinkDePago = functions.https.onCall(async (data, context) => {
     return { init_point: response.body.init_point };
   } catch (err) {
     console.error("Error creando preferencia:", err);
-    throw new functions.https.HttpsError("internal", "No se pudo crear el link de pago.");
+    throw new HttpsError("internal", "No se pudo crear el link de pago.");
   }
 });
 
-// Función para confirmar pago y guardar pedido
-exports.confirmarPago = functions.https.onCall(async (data, context) => {
+exports.confirmarPago = onCall({ region: "us-central1" }, async (data) => {
   const { payment_id, orderData } = data;
-  const { mpToken } = getConfig();
 
   if (!mpToken) {
-    console.error("MP_TOKEN no configurado en Firebase Functions config");
-    throw new functions.https.HttpsError(
-      "failed-precondition",
-      "Token de MercadoPago no configurado."
-    );
+    console.error("MP_TOKEN no configurado en variables de entorno");
+    throw new HttpsError("failed-precondition", "Token de MercadoPago no configurado.");
   }
-
   mercadopago.configure({ access_token: mpToken });
 
   if (!payment_id || !orderData) {
-    throw new functions.https.HttpsError(
-      "invalid-argument",
-      "Se requieren payment_id y orderData."
-    );
+    throw new HttpsError("invalid-argument", "Se requieren payment_id y orderData.");
   }
 
-  // 1) Verificar estado del pago en MercadoPago
   let mpResponse;
   try {
     mpResponse = await mercadopago.payment.findById(payment_id);
   } catch (err) {
     console.error("Error consultando MercadoPago:", err);
-    throw new functions.https.HttpsError("internal", "Error en MercadoPago.");
+    throw new HttpsError("internal", "Error en MercadoPago.");
   }
-
   if (mpResponse.body.status !== "approved") {
-    throw new functions.https.HttpsError(
-      "failed-precondition",
-      `Pago no aprobado: ${mpResponse.body.status}`
-    );
+    throw new HttpsError("failed-precondition", `Pago no aprobado: ${mpResponse.body.status}`);
   }
 
-  // 2) Generar orderId de manera atómica
   const counterRef = db.collection("counters").doc("orders");
   const counterSnap = await counterRef.get();
   let newOrderId = 1;
@@ -108,7 +83,6 @@ exports.confirmarPago = functions.https.onCall(async (data, context) => {
     await counterRef.set({ lastId: newOrderId });
   }
 
-  // 3) Guardar el pedido en Firestore
   const { name, email, pickupTime, comments, cart } = orderData;
   const total = cart.reduce(
     (sum, item) => sum + Number(item.price) * Number(item.quantity),
@@ -122,7 +96,7 @@ exports.confirmarPago = functions.https.onCall(async (data, context) => {
     pickupTime,
     comments,
     total,
-    items: cart.map(item => ({
+    items: cart.map((item) => ({
       name: item.name,
       quantity: item.quantity,
       price: item.price,
