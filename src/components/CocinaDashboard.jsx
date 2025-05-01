@@ -64,7 +64,7 @@ const CocinaDashboard = () => {
               <strong>Items:</strong>
               <ul className="list-disc pl-5">
                 {order.items.map((item, index) => (
-                  <li key={index}>{item.nombre} (x{item.cantidad})</li>
+                  <li key={index}>{item.name} (x{item.quantity})</li>
                 ))}
               </ul>
             </div>
