@@ -11,33 +11,47 @@ const Pedidos = () => {
     const unsubscribe = onSnapshot(
       collection(db, "orders"),
       (snapshot) => {
-        const fetchedOrders = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            orderId: data.orderId || "Sin ID",
-            name: data.name || "Sin Nombre",
-            email: data.email || "Sin Email",
-            total: data.total || 0,
-            status: data.status || "pendiente",
-            items: Array.isArray(data.items) ? data.items : [],
-            pickupTime: data.pickupTime || "0",
-            timeSubmitted: data.timeSubmitted || "Fecha no disponible",
-            comments: data.comments || "Sin comentarios",
-          };
-        });
+        const fetched = snapshot.docs
+          .map((snap) => {
+            const data = snap.data();
+            if (!data || typeof data !== "object") return null;
 
-        fetchedOrders.sort((a, b) => {
+            const pickupTime = String(data.pickupTime ?? "0");
+            let timeSubmitted = "Fecha no disponible";
+            if (data.timeSubmitted && typeof data.timeSubmitted.toDate === "function") {
+              timeSubmitted = data.timeSubmitted.toDate().toLocaleString();
+            } else if (typeof data.timeSubmitted === "string") {
+              timeSubmitted = data.timeSubmitted;
+            }
+
+            const rawStatus = data.status ?? "pendiente";
+            const status = rawStatus === "approved" ? "pendiente" : rawStatus;
+
+            return {
+              id: snap.id,
+              orderId: data.orderId ?? "Sin ID",
+              name: data.name ?? "Sin Nombre",
+              email: data.email ?? "Sin Email",
+              total: data.total ?? 0,
+              status,
+              items: Array.isArray(data.items) ? data.items : [],
+              pickupTime,
+              timeSubmitted,
+              comments: data.comments ?? "Sin comentarios",
+            };
+          })
+          .filter(Boolean);
+
+        fetched.sort((a, b) => {
           if (a.pickupTime === "0" && b.pickupTime !== "0") return -1;
           if (a.pickupTime !== "0" && b.pickupTime === "0") return 1;
           return a.pickupTime.localeCompare(b.pickupTime);
         });
 
-        setOrders(fetchedOrders);
+        setOrders(fetched);
         setLoading(false);
       },
-      (err) => {
-        console.error("Error al obtener los pedidos:", err);
+      () => {
         setError("Error al cargar los pedidos. Inténtalo de nuevo más tarde.");
         setLoading(false);
       }
@@ -49,19 +63,19 @@ const Pedidos = () => {
   const handleChangeStatus = async (id, newStatus) => {
     try {
       await updateDoc(doc(db, "orders", id), { status: newStatus });
-    } catch (error) {
-      console.error("Error al actualizar el estado del pedido:", error);
-    }
+    } catch {}
   };
 
   if (loading) return <p className="text-center text-gray-600">Cargando pedidos...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
-  const pendingOrders = orders.filter(order => order.status === "pendiente");
-  const preparedOrders = orders.filter(order => order.status === "preparado");
-  const deliveredOrders = orders.filter(order => order.status === "entregado").sort((a, b) => b.orderId - a.orderId);
+  const pending = orders.filter((o) => o.status === "pendiente");
+  const prepared = orders.filter((o) => o.status === "preparado");
+  const delivered = orders
+    .filter((o) => o.status === "entregado")
+    .sort((a, b) => b.orderId - a.orderId);
 
-  const renderOrderCard = (order, showDeliverButton = false) => (
+  const renderCard = (order, showDeliverBtn = false) => (
     <div key={order.id} className="p-4 bg-white shadow rounded-lg border border-gray-200">
       <h3 className="text-xl font-semibold mb-2">Pedido #{order.orderId}</h3>
       <p><strong>Nombre:</strong> {order.name}</p>
@@ -73,12 +87,12 @@ const Pedidos = () => {
       <div className="mt-2">
         <strong>Items:</strong>
         <ul className="list-disc pl-5">
-          {order.items.map((item, index) => (
-            <li key={index}>{item.name} (x{item.quantity})</li>
+          {order.items.map((item, i) => (
+            <li key={i}>{item.name} (x{item.quantity})</li>
           ))}
         </ul>
       </div>
-      {showDeliverButton && (
+      {showDeliverBtn && (
         <button
           onClick={() => handleChangeStatus(order.id, "entregado")}
           className="w-full bg-green-500 text-white py-2 rounded mt-4 hover:bg-green-600"
@@ -95,35 +109,26 @@ const Pedidos = () => {
 
       <section className="mb-8">
         <h3 className="text-2xl font-semibold text-red-600 mb-4">Pendientes</h3>
-        {pendingOrders.length === 0 ? (
-          <p className="text-center text-gray-600">No hay pedidos pendientes.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pendingOrders.map(order => renderOrderCard(order))}
-          </div>
-        )}
+        {pending.length === 0
+          ? <p className="text-center text-gray-600">No hay pedidos pendientes.</p>
+          : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{pending.map(o => renderCard(o))}</div>
+        }
       </section>
 
       <section className="mb-8">
         <h3 className="text-2xl font-semibold text-blue-600 mb-4">Preparados</h3>
-        {preparedOrders.length === 0 ? (
-          <p className="text-center text-gray-600">No hay pedidos preparados.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {preparedOrders.map(order => renderOrderCard(order, true))}
-          </div>
-        )}
+        {prepared.length === 0
+          ? <p className="text-center text-gray-600">No hay pedidos preparados.</p>
+          : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{prepared.map(o => renderCard(o, true))}</div>
+        }
       </section>
 
       <section>
         <h3 className="text-2xl font-semibold text-green-600 mb-4">Entregados</h3>
-        {deliveredOrders.length === 0 ? (
-          <p className="text-center text-gray-600">No hay pedidos entregados.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {deliveredOrders.map(order => renderOrderCard(order))}
-          </div>
-        )}
+        {delivered.length === 0
+          ? <p className="text-center text-gray-600">No hay pedidos entregados.</p>
+          : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{delivered.map(o => renderCard(o))}</div>
+        }
       </section>
     </div>
   );
