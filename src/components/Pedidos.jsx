@@ -129,7 +129,7 @@ const Pedidos = () => {
         <input
           type="text"
           value={searchTerm}
-          placeholder="Buscar por ID, email o nombre"
+          placeholder="Buscar por nro, email o nombre"
           onChange={(e) => setSearchTerm(e.target.value)}
           className="px-4 py-2 border rounded-md w-64"
         />
