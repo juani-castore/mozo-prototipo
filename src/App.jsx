@@ -8,7 +8,6 @@ import Checkout from "./components/Checkout";
 import OrderConfirmation from "./components/OrderConfirmation";
 import RestauranteLogin from "./components/RestauranteLogin";
 import Pedidos from "./components/Pedidos";
-import CocinaDashboard from "./components/CocinaDashboard";
 import RestauranteDashboard from "./components/RestauranteDashboard";
 import MenuDashboard from "./components/MenuDashboard"; // Nuevo componente para administrar el menú
 import PaymentFailed from "./components/PaymentFailed";
@@ -38,7 +37,6 @@ function App() {
         <Route path="/restaurante" element={<RestauranteLogin />} />
         <Route path="/restaurante/dashboard" element={<RestauranteDashboard />} />
         <Route path="/restaurante/pedidos" element={<Pedidos />} />
-        <Route path="/restaurante/cocina" element={<CocinaDashboard />} />
         <Route path="/restaurante/menu" element={<MenuDashboard />} />
       </Routes>
     </Router>

@@ -125,7 +125,7 @@ exports.confirmarPago = onCall(
       0
     );
 
-    // Guarda en Firestore
+    // Guarda en Firestore / a futuro agregar trazabilidad de pagos rechazados
     await db.collection("orders").add({
       orderId: newOrderId,
       name,
@@ -139,7 +139,7 @@ exports.confirmarPago = onCall(
         price: item.price,
       })),
       timeSubmitted: admin.firestore.FieldValue.serverTimestamp(),
-      status: "approved",
+      printed: false,
       paymentId: payment_id,
     });
 

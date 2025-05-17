@@ -16,12 +16,6 @@ const RestauranteDashboard = () => {
           Pedidos
         </button>
         <button
-          className="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700"
-          onClick={() => navigate("/restaurante/cocina")}
-        >
-          Cocina
-        </button>
-        <button
           className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700"
           onClick={() => navigate("/restaurante/menu")}
         >
