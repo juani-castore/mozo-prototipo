@@ -6,7 +6,7 @@ const RestauranteDashboard = () => {
   const navigate = useNavigate();
 
   const clientId = "5793584130197915";
-  const redirectUri = "https://mozo-prototipo.vercel.app/api/mp/callback";
+  const redirectUri = "https://callbackmp-o3y6kyilea-uc.a.run.app";
 
   const authUrl = `https://auth.mercadopago.com.ar/authorization?client_id=${clientId}&response_type=code&platform_id=mp&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
