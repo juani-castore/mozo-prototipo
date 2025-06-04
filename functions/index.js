@@ -1,4 +1,5 @@
-const functions = require("firebase-functions");
+const { onCall, onRequest } = require("firebase-functions/v2/https");
+const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const mercadopago = require("mercadopago");
 const axios = require("axios");
@@ -7,24 +8,30 @@ const { v4: uuidv4 } = require("uuid");
 admin.initializeApp();
 const db = admin.firestore();
 
-const mpToken = process.env.MP_TOKEN || functions.config().mercadopago.token;
-const baseUrl = process.env.BASE_URL || functions.config().app.base_url;
-const clientSecret = functions.config().mercadopago.client_secret;
+setGlobalOptions({ region: "us-central1" });
 
-// ✅ Genera link de pago y guarda pedido temporal
-exports.generarLinkDePago = functions.https.onCall(async (req, context) => {
+const clientSecret = process.env.MP_CLIENT_SECRET || admin.app().options?.clientSecret;
+const baseUrl = process.env.BASE_URL || "https://mozoapp.com"; // ajustalo a tu frontend real
+
+async function getAccessToken() {
+  const doc = await db.collection("integraciones").doc("mercadoPago").get();
+  if (!doc.exists) throw new Error("MP no conectado");
+  return doc.data().access_token;
+}
+
+// ✅ Genera link de pago
+exports.generarLinkDePago = onCall(async (req) => {
   const { carrito, mesa, orderData } = req.data || {};
-
-  if (!mpToken) throw new functions.https.HttpsError("failed-precondition", "MP_TOKEN no configurado.");
   if (!Array.isArray(carrito) || !orderData) {
-    throw new functions.https.HttpsError("invalid-argument", "Carrito u orderData inválido.");
+    throw new Error("Datos inválidos.");
   }
 
-  mercadopago.configure({ access_token: mpToken });
+  const access_token = await getAccessToken();
+  mercadopago.configure({ access_token });
 
   const paymentId = uuidv4();
   const preference = {
-    items: carrito.map((item) => ({
+    items: carrito.map(item => ({
       title: item.name,
       quantity: item.quantity,
       unit_price: Number(item.price),
@@ -49,72 +56,72 @@ exports.generarLinkDePago = functions.https.onCall(async (req, context) => {
     return { init_point: response.body.init_point, paymentId };
   } catch (err) {
     console.error("Error creando preferencia:", err);
-    throw new functions.https.HttpsError("internal", "No se pudo crear el link de pago.");
+    throw new Error("Error creando el link.");
   }
 });
 
-// ✅ Confirma pago desde frontend
-exports.confirmarPago = functions.https.onCall(async (req, context) => {
+// ✅ Confirmación desde frontend
+exports.confirmarPago = onCall(async (req) => {
   const { payment_id, orderData } = req.data || {};
-
-  if (!mpToken) throw new functions.https.HttpsError("failed-precondition", "MP_TOKEN no configurado.");
   if (!payment_id || !orderData) {
-    throw new functions.https.HttpsError("invalid-argument", "Faltan payment_id u orderData.");
+    throw new Error("Datos incompletos.");
   }
 
-  mercadopago.configure({ access_token: mpToken });
+  const access_token = await getAccessToken();
+  mercadopago.configure({ access_token });
 
   try {
-    const mpResponse = await mercadopago.payment.findById(payment_id);
-    if (mpResponse.body.status !== "approved") {
-      throw new functions.https.HttpsError("failed-precondition", `Pago no aprobado: ${mpResponse.body.status}`);
+    const pago = await mercadopago.payment.findById(payment_id);
+    if (pago.body.status !== "approved") {
+      throw new Error(`Estado: ${pago.body.status}`);
     }
 
     return await guardarPedido(payment_id, orderData);
   } catch (err) {
-    console.error("Error consultando MP:", err);
-    throw new functions.https.HttpsError("internal", "Error en MercadoPago.");
+    console.error("Confirmar pago:", err);
+    throw new Error("Error verificando pago.");
   }
 });
 
-// ✅ Confirma pago automáticamente si el usuario no vuelve
-exports.webhookPago = functions.https.onRequest(async (req, res) => {
+// ✅ Confirmación automática
+exports.webhookPago = onRequest({}, async (req, res) => {
   const paymentId = req.body.data?.id;
-  if (!paymentId) return res.status(400).send("Falta payment_id");
+  if (!paymentId) return res.status(400).send("Falta ID");
 
   try {
-    mercadopago.configure({ access_token: mpToken });
-    const mpResponse = await mercadopago.payment.findById(paymentId);
-    const status = mpResponse.body.status;
-    const reference = mpResponse.body.external_reference;
+    const access_token = await getAccessToken();
+    mercadopago.configure({ access_token });
+
+    const pago = await mercadopago.payment.findById(paymentId);
+    const status = pago.body.status;
+    const reference = pago.body.external_reference;
 
     if (status !== "approved") return res.status(200).send("Pago no aprobado");
 
-    const ref = db.collection("pendingOrders").doc(reference);
-    const doc = await ref.get();
-    if (!doc.exists) return res.status(404).send("OrderData no encontrado");
+    const doc = await db.collection("pendingOrders").doc(reference).get();
+    if (!doc.exists) return res.status(404).send("Pedido no encontrado");
 
     const orderData = doc.data().orderData;
     await guardarPedido(paymentId, orderData);
-    await ref.delete();
+    await db.collection("pendingOrders").doc(reference).delete();
 
-    return res.status(200).send("Pedido confirmado vía webhook");
+    return res.status(200).send("OK");
   } catch (err) {
-    console.error("Error en webhook:", err);
-    return res.status(500).send("Error interno");
+    console.error("Webhook error:", err);
+    return res.status(500).send("Error");
   }
 });
 
-// ✅ Recibe el `code` de MP y guarda el access_token
-exports.callbackMP = functions.https.onRequest(async (req, res) => {
+// ✅ Callback OAuth
+exports.callbackMP = onRequest({}, async (req, res) => {
   const code = req.query.code;
-  if (!code) return res.status(400).send("Falta el parámetro 'code'");
+  if (!code) return res.status(400).send("Falta code");
 
   try {
     const client_id = "5793584130197915";
     const redirect_uri = "https://us-central1-prototipo-mozo.cloudfunctions.net/callbackMP";
 
-    const response = await axios.post("https://api.mercadopago.com/oauth/token", {
+    const tokenResponse = await axios.post("https://api.mercadopago.com/oauth/token", {
       grant_type: "authorization_code",
       client_id,
       client_secret: clientSecret,
@@ -124,8 +131,7 @@ exports.callbackMP = functions.https.onRequest(async (req, res) => {
       headers: { "Content-Type": "application/json" },
     });
 
-    const { access_token, public_key, user_id } = response.data;
-
+    const { access_token, public_key, user_id } = tokenResponse.data;
     await db.collection("integraciones").doc("mercadoPago").set({
       access_token,
       public_key,
@@ -136,26 +142,21 @@ exports.callbackMP = functions.https.onRequest(async (req, res) => {
 
     return res.redirect("/restaurante/dashboard");
   } catch (err) {
-    console.error("Error en callbackMP:", err.response?.data || err.message);
-    return res.status(500).send("Error al obtener access_token de Mercado Pago.");
+    console.error("Callback MP:", err.response?.data || err.message);
+    return res.status(500).send("Error conectando MP");
   }
 });
 
-// ✅ Función reutilizable para guardar un pedido
+// 🔁 Guarda pedido en Firestore
 async function guardarPedido(paymentId, orderData) {
   const counterRef = db.collection("counters").doc("orders");
   const counterSnap = await counterRef.get();
 
-  let newOrderId = 1;
-  if (counterSnap.exists) {
-    newOrderId = counterSnap.data().lastId + 1;
-    await counterRef.update({ lastId: newOrderId });
-  } else {
-    await counterRef.set({ lastId: newOrderId });
-  }
+  const newOrderId = counterSnap.exists ? counterSnap.data().lastId + 1 : 1;
+  await counterRef.set({ lastId: newOrderId });
 
   const { name, email, pickupTime, comments, cart } = orderData;
-  const total = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
+  const total = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
 
   await db.collection("orders").add({
     orderId: newOrderId,
@@ -164,7 +165,7 @@ async function guardarPedido(paymentId, orderData) {
     pickupTime,
     comments,
     total,
-    items: cart.map((item) => ({
+    items: cart.map(item => ({
       name: item.name,
       quantity: item.quantity,
       price: item.price,

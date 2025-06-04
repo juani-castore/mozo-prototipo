@@ -1,7 +1,5 @@
 {
   "functions": {
-    "source": "functions",
-    "runtime": "nodejs18",
-    "functionGeneration": "gen1"
+    "source": "functions"
   }
 }
