@@ -1,8 +1,11 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../CartContext";
-import { httpsCallable } from "firebase/functions";
-import { functions } from "../firebaseConfig";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { app } from "../firebaseConfig"; // ya lo tenés configurado
+
+const functions = getFunctions(app);
+const generarLinkDePago = httpsCallable(functions, "generarLinkDePago");
 
 const Checkout = () => {
   const { cart } = useContext(CartContext);
@@ -33,24 +36,11 @@ const Checkout = () => {
     }
 
     try {
-      console.log("Carrito actual:", cart);
-
       const carritoMP = cart.map((item) => ({
         name: item.name,
         price: Number(item.price),
         quantity: Number(item.quantity),
       }));
-
-      console.log("Carrito enviado a generarLinkDePago:", carritoMP);
-
-      if (!Array.isArray(carritoMP) || carritoMP.length === 0) {
-        console.error("El carrito no es un arreglo válido o está vacío:", carritoMP);
-        alert("El carrito no es válido. Por favor, revisa tu pedido.");
-        setIsLoading(false);
-        return;
-      }
-
-      const generarLinkDePago = httpsCallable(functions, "generarLinkDePago");
 
       const orderData = {
         name: formData.name,
@@ -60,25 +50,22 @@ const Checkout = () => {
         cart,
       };
 
-      const response = await generarLinkDePago({
+      const mesa = "Mesa 1"; // Puedes cambiar esto según tu lógica
+
+      const result = await generarLinkDePago({
         carrito: carritoMP,
-        mesa: "Mesa 1", // Example metadata
+        mesa,
+        orderData,
       });
 
-      localStorage.setItem(
-        "orderData",
-        JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          pickupTime: formData.pickupTime,
-          comments: formData.comments,
-          cart,
-        })
-      );
+      const { init_point, paymentId } = result.data;
+      console.log("🔗 Link de pago:", init_point);
 
-      window.location.href = response.data.init_point;
+      localStorage.setItem("orderData", JSON.stringify(orderData));
+
+      window.location.href = init_point;
     } catch (error) {
-      console.error("Error al generar el link de pago:", error);
+      console.error("❌ Error al generar link de pago:", error);
       alert("No se pudo procesar el pago. Intente más tarde.");
     } finally {
       setIsLoading(false);
