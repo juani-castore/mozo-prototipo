@@ -23,44 +23,47 @@ async function getAccessToken() {
 }
 
 // ✅ Generar link de pago
-exports.generarLinkDePago = onCall(async (req) => {
-  const { carrito, mesa, orderData } = req.data || {};
-  if (!Array.isArray(carrito) || !orderData) {
-    throw new Error("Datos inválidos.");
-  }
+exports.generarLinkDePago = onRequest((req, res) => {
+  corsHandler(req, res, async () => {
+    const { carrito, mesa, orderData } = req.body || {};
+    if (!Array.isArray(carrito) || !orderData) {
+      return res.status(400).json({ error: "Datos inválidos." });
+    }
 
-  const access_token = await getAccessToken();
-  mercadopago.configure({ access_token });
+    try {
+      const access_token = await getAccessToken();
+      mercadopago.configure({ access_token });
 
-  const paymentId = uuidv4();
-  const preference = {
-    items: carrito.map(item => ({
-      title: item.name,
-      quantity: item.quantity,
-      unit_price: Number(item.price),
-      currency_id: "ARS",
-    })),
-    back_urls: {
-      success: `${baseUrl}/order-confirmation`,
-      failure: `${baseUrl}/payment-failed`,
-      pending: `${baseUrl}/payment-pending`,
-    },
-    auto_return: "approved",
-    metadata: { mesa },
-    external_reference: paymentId,
-  };
+      const paymentId = uuidv4();
+      const preference = {
+        items: carrito.map(item => ({
+          title: item.name,
+          quantity: item.quantity,
+          unit_price: Number(item.price),
+          currency_id: "ARS",
+        })),
+        back_urls: {
+          success: `${baseUrl}/order-confirmation`,
+          failure: `${baseUrl}/payment-failed`,
+          pending: `${baseUrl}/payment-pending`,
+        },
+        auto_return: "approved",
+        metadata: { mesa },
+        external_reference: paymentId,
+      };
 
-  try {
-    const response = await mercadopago.preferences.create(preference);
-    await db.collection("pendingOrders").doc(paymentId).set({
-      orderData,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    return { init_point: response.body.init_point, paymentId };
-  } catch (err) {
-    console.error("Error creando preferencia:", err);
-    throw new Error("Error creando el link.");
-  }
+      const response = await mercadopago.preferences.create(preference);
+      await db.collection("pendingOrders").doc(paymentId).set({
+        orderData,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return res.status(200).json({ init_point: response.body.init_point, paymentId });
+    } catch (err) {
+      console.error("Error creando preferencia:", err);
+      return res.status(500).json({ error: "Error creando el link." });
+    }
+  });
 });
 
 // ✅ Confirmación manual desde frontend

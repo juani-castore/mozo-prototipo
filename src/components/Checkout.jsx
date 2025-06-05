@@ -1,11 +1,7 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../CartContext";
-import { getFunctions, httpsCallable } from "firebase/functions";
 import { app } from "../firebaseConfig"; // ya lo tenés configurado
-
-const functions = getFunctions(app);
-const generarLinkDePago = httpsCallable(functions, "generarLinkDePago");
 
 const Checkout = () => {
   const { cart } = useContext(CartContext);
@@ -29,12 +25,6 @@ const Checkout = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (cart.length === 0) {
-      alert("Tu carrito está vacío.");
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const carritoMP = cart.map((item) => ({
         name: item.name,
@@ -50,23 +40,27 @@ const Checkout = () => {
         cart,
       };
 
-      const mesa = "Mesa 1"; // Puedes cambiar esto según tu lógica
+      const response = await fetch(
+        "https://us-central1-prototipo-mozo.cloudfunctions.net/generarLinkDePago",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            carrito: carritoMP,
+            mesa: "Mesa 1",
+            orderData,
+          }),
+        }
+      );
 
-      const result = await generarLinkDePago({
-        carrito: carritoMP,
-        mesa,
-        orderData,
-      });
-
-      const { init_point, paymentId } = result.data;
-      console.log("🔗 Link de pago:", init_point);
+      if (!response.ok) throw new Error("Error HTTP: " + response.status);
+      const data = await response.json();
 
       localStorage.setItem("orderData", JSON.stringify(orderData));
-
-      window.location.href = init_point;
+      window.location.href = data.init_point;
     } catch (error) {
       console.error("❌ Error al generar link de pago:", error);
-      alert("No se pudo procesar el pago. Intente más tarde.");
+      alert("No se pudo procesar el pago.");
     } finally {
       setIsLoading(false);
     }
