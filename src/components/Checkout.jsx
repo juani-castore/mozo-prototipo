@@ -51,6 +51,15 @@ const Checkout = () => {
       }
 
       const generarLinkDePago = httpsCallable(functions, "generarLinkDePago");
+
+      const orderData = {
+        name: formData.name,
+        email: formData.email,
+        pickupTime: formData.pickupTime,
+        comments: formData.comments,
+        cart,
+      };
+
       const response = await generarLinkDePago({
         carrito: carritoMP,
         mesa: "Mesa 1", // Example metadata

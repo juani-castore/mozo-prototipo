@@ -4,6 +4,8 @@ const admin = require("firebase-admin");
 const mercadopago = require("mercadopago");
 const axios = require("axios");
 const { v4: uuidv4 } = require("uuid");
+const cors = require("cors");
+const corsHandler = cors({ origin: true });
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -11,15 +13,16 @@ const db = admin.firestore();
 setGlobalOptions({ region: "us-central1" });
 
 const clientSecret = process.env.MP_CLIENT_SECRET || admin.app().options?.clientSecret;
-const baseUrl = process.env.BASE_URL || "https://mozoapp.com"; // ajustalo a tu frontend real
+const baseUrl = process.env.BASE_URL || "https://mozo-prototipo.vercel.app"; // ajustalo si cambia
 
+// 🔐 Obtener token dinámico de Firestore
 async function getAccessToken() {
   const doc = await db.collection("integraciones").doc("mercadoPago").get();
   if (!doc.exists) throw new Error("MP no conectado");
   return doc.data().access_token;
 }
 
-// ✅ Genera link de pago
+// ✅ Generar link de pago
 exports.generarLinkDePago = onCall(async (req) => {
   const { carrito, mesa, orderData } = req.data || {};
   if (!Array.isArray(carrito) || !orderData) {
@@ -60,7 +63,7 @@ exports.generarLinkDePago = onCall(async (req) => {
   }
 });
 
-// ✅ Confirmación desde frontend
+// ✅ Confirmación manual desde frontend
 exports.confirmarPago = onCall(async (req) => {
   const { payment_id, orderData } = req.data || {};
   if (!payment_id || !orderData) {
@@ -83,43 +86,45 @@ exports.confirmarPago = onCall(async (req) => {
   }
 });
 
-// ✅ Confirmación automática
-exports.webhookPago = onRequest({}, async (req, res) => {
-  const paymentId = req.body.data?.id;
-  if (!paymentId) return res.status(400).send("Falta ID");
+// ✅ Confirmación automática con CORS
+exports.webhookPago = onRequest((req, res) => {
+  corsHandler(req, res, async () => {
+    const paymentId = req.body.data?.id;
+    if (!paymentId) return res.status(400).send("Falta ID");
 
-  try {
-    const access_token = await getAccessToken();
-    mercadopago.configure({ access_token });
+    try {
+      const access_token = await getAccessToken();
+      mercadopago.configure({ access_token });
 
-    const pago = await mercadopago.payment.findById(paymentId);
-    const status = pago.body.status;
-    const reference = pago.body.external_reference;
+      const pago = await mercadopago.payment.findById(paymentId);
+      const status = pago.body.status;
+      const reference = pago.body.external_reference;
 
-    if (status !== "approved") return res.status(200).send("Pago no aprobado");
+      if (status !== "approved") return res.status(200).send("Pago no aprobado");
 
-    const doc = await db.collection("pendingOrders").doc(reference).get();
-    if (!doc.exists) return res.status(404).send("Pedido no encontrado");
+      const doc = await db.collection("pendingOrders").doc(reference).get();
+      if (!doc.exists) return res.status(404).send("Pedido no encontrado");
 
-    const orderData = doc.data().orderData;
-    await guardarPedido(paymentId, orderData);
-    await db.collection("pendingOrders").doc(reference).delete();
+      const orderData = doc.data().orderData;
+      await guardarPedido(paymentId, orderData);
+      await db.collection("pendingOrders").doc(reference).delete();
 
-    return res.status(200).send("OK");
-  } catch (err) {
-    console.error("Webhook error:", err);
-    return res.status(500).send("Error");
-  }
+      return res.status(200).send("OK");
+    } catch (err) {
+      console.error("Webhook error:", err);
+      return res.status(500).send("Error");
+    }
+  });
 });
 
-// ✅ Callback OAuth
-exports.callbackMP = onRequest({}, async (req, res) => {
+// ✅ Callback para el botón de conexión con MercadoPago
+exports.callbackMP = onRequest(async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send("Falta code");
 
   try {
     const client_id = "5793584130197915";
-    const redirect_uri = "https://us-central1-prototipo-mozo.cloudfunctions.net/callbackMP";
+    const redirect_uri = "https://callbackmp-o3y6kyilea-uc.a.run.app";
 
     const tokenResponse = await axios.post("https://api.mercadopago.com/oauth/token", {
       grant_type: "authorization_code",
@@ -147,7 +152,7 @@ exports.callbackMP = onRequest({}, async (req, res) => {
   }
 });
 
-// 🔁 Guarda pedido en Firestore
+// 🧾 Guardar pedido definitivo
 async function guardarPedido(paymentId, orderData) {
   const counterRef = db.collection("counters").doc("orders");
   const counterSnap = await counterRef.get();
