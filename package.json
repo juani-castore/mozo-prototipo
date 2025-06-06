@@ -12,6 +12,7 @@
     "@mercadopago/sdk-react": "^1.0.0",
     "axios": "^1.9.0",
     "firebase": "^11.2.0",
+    "firebase-functions": "^6.3.2",
     "follow-redirects": "^1.15.9",
     "mercadopago": "^2.7.0",
     "qrcode.react": "^4.2.0",
