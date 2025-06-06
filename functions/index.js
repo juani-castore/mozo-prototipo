@@ -1,80 +1,94 @@
-const { onCall, onRequest } = require("firebase-functions/v2/https");
-const { setGlobalOptions } = require("firebase-functions/v2");
+const { onRequest } = require("firebase-functions/v2/https");
+const { onCall } = require("firebase-functions/v2/https");
+const logger = require("firebase-functions/logger");
+const cors = require("cors")({ origin: true });
 const admin = require("firebase-admin");
-const mercadopago = require("mercadopago");
-const axios = require("axios");
 const { v4: uuidv4 } = require("uuid");
-const cors = require("cors");
-const corsHandler = cors({ origin: true });
+const mercadopago = require("mercadopago");
+const { Preference } = require("mercadopago");
 
 admin.initializeApp();
 const db = admin.firestore();
 
-setGlobalOptions({ region: "us-central1" });
-
-const clientSecret = process.env.MP_CLIENT_SECRET || admin.app().options?.clientSecret;
-const baseUrl = process.env.BASE_URL || "https://mozo-prototipo.vercel.app"; // ajustalo si cambia
-
-// 🔐 Obtener token dinámico de Firestore
-async function getAccessToken() {
-  const doc = await db.collection("integraciones").doc("mercadoPago").get();
-  if (!doc.exists) throw new Error("MP no conectado");
-  return doc.data().access_token;
+function getAccessToken() {
+  const token = process.env.MP_TOKEN;
+  if (!token) throw new Error("MP_TOKEN no configurado");
+  return token;
 }
 
-// ✅ Generar link de pago
-exports.generarLinkDePago = onRequest((req, res) => {
-  corsHandler(req, res, async () => {
+async function guardarPedido(paymentId, orderData) {
+  const orderId = uuidv4();
+  await db.collection("orders").add({
+    orderId,
+    paymentId,
+    ...orderData,
+    status: "approved",
+    timeSubmitted: new Date(),
+    printed: false,
+  });
+  return { success: true, orderId };
+}
+
+exports.generarLinkDePago = onRequest(async (req, res) => {
+  cors(req, res, async () => {
     const { carrito, mesa, orderData } = req.body || {};
-    if (!Array.isArray(carrito) || !orderData) {
-      return res.status(400).json({ error: "Datos inválidos." });
+
+    logger.log("Request received:", req.body);
+
+    if (!Array.isArray(carrito) || typeof mesa !== "string") {
+      logger.error("Datos inválidos", { carrito, mesa });
+      return res.status(400).json({ error: "Datos inválidos" });
     }
 
+    const access_token = getAccessToken();
+    mercadopago.configurations.setAccessToken(access_token);
+
+    const preference = {
+      items: carrito.map((item) => ({
+        title: item.name,
+        quantity: item.quantity,
+        unit_price: parseFloat(item.price),
+        currency_id: "ARS",
+      })),
+      back_urls: {
+        success: "https://mozo-prototipo.vercel.app/order-confirmation",
+        failure: "https://mozo-prototipo.vercel.app/payment-failed",
+        pending: "https://mozo-prototipo.vercel.app/payment-pending",
+      },
+      auto_return: "approved",
+      metadata: { mesa },
+      external_reference: uuidv4(),
+    };
+
+    logger.log("Preference created:", preference);
+
     try {
-      const access_token = await getAccessToken();
-      mercadopago.configure({ access_token });
+      const preferenceClient = new Preference();
+      const response = await preferenceClient.create(preference);
 
-      const paymentId = uuidv4();
-      const preference = {
-        items: carrito.map(item => ({
-          title: item.name,
-          quantity: item.quantity,
-          unit_price: Number(item.price),
-          currency_id: "ARS",
-        })),
-        back_urls: {
-          success: `${baseUrl}/order-confirmation`,
-          failure: `${baseUrl}/payment-failed`,
-          pending: `${baseUrl}/payment-pending`,
-        },
-        auto_return: "approved",
-        metadata: { mesa },
-        external_reference: paymentId,
-      };
+      if (orderData) {
+        await db.collection("pendingOrders").doc(preference.external_reference).set({
+          orderData,
+          createdAt: new Date(),
+        });
+      }
 
-      const response = await mercadopago.preferences.create(preference);
-      await db.collection("pendingOrders").doc(paymentId).set({
-        orderData,
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-      });
-
-      return res.status(200).json({ init_point: response.body.init_point, paymentId });
+      return res.status(200).json({ init_point: response.init_point });
     } catch (err) {
-      console.error("Error creando preferencia:", err);
-      return res.status(500).json({ error: "Error creando el link." });
+      logger.error("Error creating payment link:", err);
+      return res.status(500).json({ error: "Error generando link de pago" });
     }
   });
 });
 
-// ✅ Confirmación manual desde frontend
 exports.confirmarPago = onCall(async (req) => {
   const { payment_id, orderData } = req.data || {};
   if (!payment_id || !orderData) {
     throw new Error("Datos incompletos.");
   }
 
-  const access_token = await getAccessToken();
-  mercadopago.configure({ access_token });
+  const access_token = getAccessToken();
+  mercadopago.configurations.setAccessToken(access_token);
 
   try {
     const pago = await mercadopago.payment.findById(payment_id);
@@ -84,20 +98,19 @@ exports.confirmarPago = onCall(async (req) => {
 
     return await guardarPedido(payment_id, orderData);
   } catch (err) {
-    console.error("Confirmar pago:", err);
+    logger.error("Confirmar pago:", err);
     throw new Error("Error verificando pago.");
   }
 });
 
-// ✅ Confirmación automática con CORS
 exports.webhookPago = onRequest((req, res) => {
-  corsHandler(req, res, async () => {
+  cors(req, res, async () => {
     const paymentId = req.body.data?.id;
     if (!paymentId) return res.status(400).send("Falta ID");
 
     try {
-      const access_token = await getAccessToken();
-      mercadopago.configure({ access_token });
+      const access_token = getAccessToken();
+      mercadopago.configurations.setAccessToken(access_token);
 
       const pago = await mercadopago.payment.findById(paymentId);
       const status = pago.body.status;
@@ -114,74 +127,12 @@ exports.webhookPago = onRequest((req, res) => {
 
       return res.status(200).send("OK");
     } catch (err) {
-      console.error("Webhook error:", err);
+      logger.error("Webhook error:", err);
       return res.status(500).send("Error");
     }
   });
 });
 
-// ✅ Callback para el botón de conexión con MercadoPago
-exports.callbackMP = onRequest(async (req, res) => {
-  const code = req.query.code;
-  if (!code) return res.status(400).send("Falta code");
-
-  try {
-    const client_id = "5793584130197915";
-    const redirect_uri = "https://callbackmp-o3y6kyilea-uc.a.run.app";
-
-    const tokenResponse = await axios.post("https://api.mercadopago.com/oauth/token", {
-      grant_type: "authorization_code",
-      client_id,
-      client_secret: clientSecret,
-      code,
-      redirect_uri,
-    }, {
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const { access_token, public_key, user_id } = tokenResponse.data;
-    await db.collection("integraciones").doc("mercadoPago").set({
-      access_token,
-      public_key,
-      user_id,
-      conectado: true,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    });
-
-    return res.redirect("/restaurante/dashboard");
-  } catch (err) {
-    console.error("Callback MP:", err.response?.data || err.message);
-    return res.status(500).send("Error conectando MP");
-  }
+exports.callbackMP = onRequest((req, res) => {
+  return res.redirect("https://mozo-prototipo.vercel.app/order-confirmation");
 });
-
-// 🧾 Guardar pedido definitivo
-async function guardarPedido(paymentId, orderData) {
-  const counterRef = db.collection("counters").doc("orders");
-  const counterSnap = await counterRef.get();
-
-  const newOrderId = counterSnap.exists ? counterSnap.data().lastId + 1 : 1;
-  await counterRef.set({ lastId: newOrderId });
-
-  const { name, email, pickupTime, comments, cart } = orderData;
-  const total = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
-
-  await db.collection("orders").add({
-    orderId: newOrderId,
-    name,
-    email,
-    pickupTime,
-    comments,
-    total,
-    items: cart.map(item => ({
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price,
-    })),
-    timeSubmitted: admin.firestore.FieldValue.serverTimestamp(),
-    printed: false,
-    paymentId,
-  });
-
-  return { orderId: newOrderId };
-}
