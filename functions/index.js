@@ -141,7 +141,7 @@ exports.webhookPago = onRequest({
   const id = req.query["data.id"];
   const topic = req.query.topic || req.query.type;
 
-  console.log("📩 Webhook recibido:", req.query);
+  //console.log("📩 Webhook recibido:", req.query);
   console.log("🧠 Topic:", topic, "ID:", id);
 
   if (!id) {
@@ -163,7 +163,7 @@ exports.webhookPago = onRequest({
     }
 
     const externalRef = pago.external_reference;
-    console.log("🧾 Buscando pendingOrder con ID:", externalRef);
+    //console.log("🧾 Buscando pendingOrder con ID:", externalRef);
     const docRef = db.collection("pendingOrders").doc(externalRef);
     const docSnap = await docRef.get();
 

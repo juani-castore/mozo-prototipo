@@ -23,8 +23,6 @@ const Menu = () => {
           ...doc.data(),
         }));
         
-        // [DEBUG] Muestra en consola lo que obtuviste de Firestore
-        console.log("Items desde Firestore:", items);
 
         setProducts(items);
 
@@ -47,8 +45,6 @@ const Menu = () => {
 
   // 2. Agregar producto al carrito, con un aviso de notificación
   const handleAddToCart = (product) => {
-    // [DEBUG] Ver qué producto se agrega al carrito
-    console.log("Producto que se agrega al carrito:", product);
 
     if (product.stock > 0) {
       addToCart(product);

@@ -6,10 +6,6 @@ const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
 
   const calculateTotal = () => {
-    // Imprime en consola el precio y su tipo para cada producto
-    cart.forEach((item) => {
-      console.log(`Producto: ${item.name} - Price: ${item.price} (tipo: ${typeof item.price})`);
-    });
     return cart.reduce((total, item) => {
       // Si item.price es undefined o no es convertible, se usará 0
       const itemPrice = parseFloat(item.price) || 0;
