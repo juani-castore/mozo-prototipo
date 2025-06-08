@@ -26,12 +26,6 @@ const RestauranteDashboard = () => {
         >
           Menú
         </button>
-        <a
-          href={authUrl}
-          className="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700"
-        >
-          Conectar cuenta de MP
-        </a>
       </div>
     </div>
   );
