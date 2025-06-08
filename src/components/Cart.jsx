@@ -7,7 +7,6 @@ const Cart = () => {
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => {
-      // Si item.price es undefined o no es convertible, se usará 0
       const itemPrice = parseFloat(item.price) || 0;
       return total + itemPrice * item.quantity;
     }, 0);
@@ -15,7 +14,9 @@ const Cart = () => {
 
   const handleIncrease = (productId) => {
     const product = cart.find((item) => item.id === productId);
-    updateQuantity(productId, product.quantity + 1);
+    if (product.quantity < product.stock) {
+      updateQuantity(productId, product.quantity + 1);
+    }
   };
 
   const handleDecrease = (productId) => {
@@ -40,9 +41,10 @@ const Cart = () => {
               <div>
                 <h3 className="text-lg font-bold">{item.name}</h3>
                 <p>Cantidad: {item.quantity}</p>
-                <p className="text-sm">
-                  Precio: ${ (parseFloat(item.price) || 0) * item.quantity }
-                </p>
+                <p className="text-sm">Precio: ${item.price * item.quantity}</p>
+                {item.quantity >= item.stock && (
+                  <p className="text-xs text-yellow-200 mt-1">Máximo disponible en stock</p>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 <button
@@ -53,7 +55,12 @@ const Cart = () => {
                 </button>
                 <button
                   onClick={() => handleIncrease(item.id)}
-                  className="bg-white text-brick px-3 py-1 rounded-full font-bold shadow-md hover:bg-gray-200"
+                  className={`px-3 py-1 rounded-full font-bold shadow-md ${
+                    item.quantity >= item.stock
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-white text-brick hover:bg-gray-200"
+                  }`}
+                  disabled={item.quantity >= item.stock}
                 >
                   +
                 </button>
