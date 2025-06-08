@@ -26,6 +26,12 @@ const RestauranteDashboard = () => {
         >
           Menú
         </button>
+        <button
+          className="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700"
+          onClick={() => navigate("/restaurante/estadisticas")}
+        >
+          Estadísticas
+        </button>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import RestauranteDashboard from "./components/RestauranteDashboard";
 import MenuDashboard from "./components/MenuDashboard"; // Nuevo componente para administrar el menú
 import PaymentFailed from "./components/PaymentFailed";
 import PaymentPending from "./components/PaymentPending";
-
+import Estadisticas from "./components/Estadisticas"; // Componente para estadísticas
 
 function App() {
   const [cart, setCart] = useState(() => {
@@ -38,6 +38,7 @@ function App() {
         <Route path="/restaurante/dashboard" element={<RestauranteDashboard />} />
         <Route path="/restaurante/pedidos" element={<Pedidos />} />
         <Route path="/restaurante/menu" element={<MenuDashboard />} />
+        <Route path="/restaurante/estadisticas" element={<Estadisticas />} />
       </Routes>
     </Router>
   );

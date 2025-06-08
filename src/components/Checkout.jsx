@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../CartContext";
-import { app } from "../firebaseConfig"; // ya lo tenés configurado
+
 
 const Checkout = () => {
   const { cart } = useContext(CartContext);
