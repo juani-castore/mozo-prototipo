@@ -122,3 +122,6 @@ VITE_MP_REDIRECT_URI=
 - Que optimice la modularidad y separación lógica (auth, pedidos, printer, etc).
 - Que agregue tests básicos para la función de impresión y los pagos.
 - Que prepare el build para producción (minificación, variables, rutas seguras).
+
+
+-- Tambien hay que agregar lo de descontar el stock de los productos al momento de confirmar el pedido. [Todo esto desde el backend] | ya lo agregue como funtion separada pero hay que reanalizar el tema de que tan seguro es dejarlo asi.

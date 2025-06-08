@@ -1,6 +1,8 @@
 // src/components/OrderConfirmation.jsx
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { db } from "../firebaseConfig";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 const OrderConfirmation = () => {
   const [params] = useSearchParams();
@@ -24,6 +26,7 @@ const OrderConfirmation = () => {
       }
 
       try {
+        // Confirmar pago
         const response = await fetch("https://us-central1-prototipo-mozo.cloudfunctions.net/confirmarPago", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -37,6 +40,18 @@ const OrderConfirmation = () => {
         const data = await response.json();
         setOrderId(data.orderId);
 
+        // Descontar stock con nueva función backend
+        try {
+          await fetch("https://us-central1-prototipo-mozo.cloudfunctions.net/descontarStock", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: orderData.cart }),
+          });
+        } catch (err) {
+          console.warn("⚠️ No se pudo descontar stock:", err);
+        }
+
+        // Limpiar localStorage
         localStorage.removeItem("orderData");
         localStorage.removeItem("cart");
       } catch (error) {
