@@ -125,3 +125,4 @@ VITE_MP_REDIRECT_URI=
 
 
 -- Tambien hay que agregar lo de descontar el stock de los productos al momento de confirmar el pedido. [Todo esto desde el backend] | ya lo agregue como funtion separada pero hay que reanalizar el tema de que tan seguro es dejarlo asi.
+Tambien hay que chequear un toque lo de que se puede llegar a comprar cosas que no estan en stock si lo forzas haciendo cosas raras, pero me parecio un problema menor.
