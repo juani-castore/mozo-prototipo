@@ -186,31 +186,35 @@ exports.webhookPago = onRequest({
 });
 
 // ⚡ descontarStock — descuenta stock de cada item recibido
-exports.descontarStock = onRequest(async (req, res) => {
-  const { items } = req.body;
+exports.descontarStock = onRequest((req, res) => {
+  corsHandler(req, res, async () => {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Método no permitido" });
+    }
 
-  if (!Array.isArray(items)) {
-    return res.status(400).json({ error: "Formato inválido. Esperado: { items: [] }" });
-  }
+    const { items } = req.body;
 
-  const batch = db.batch();
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ error: "Formato inválido. Esperado: { items: [] }" });
+    }
 
-  for (const item of items) {
-    if (!item.id || typeof item.quantity !== "number") continue;
+    const batch = db.batch();
 
-    const productRef = db.collection("menu").doc(item.id);
-    const productSnap = await productRef.get();
+    for (const item of items) {
+      if (!item.id || typeof item.quantity !== "number") continue;
 
-    if (!productSnap.exists) continue;
+      const productRef = db.collection("menu").doc(item.id);
+      const productSnap = await productRef.get();
 
-    const currentStock = productSnap.data().stock || 0;
-    const newStock = Math.max(currentStock - item.quantity, 0);
+      if (!productSnap.exists) continue;
 
-    batch.update(productRef, { stock: newStock });
-  }
+      const currentStock = productSnap.data().stock || 0;
+      const newStock = Math.max(currentStock - item.quantity, 0);
 
-  await batch.commit();
-  res.status(200).json({ success: true });
+      batch.update(productRef, { stock: newStock });
+    }
+
+    await batch.commit();
+    res.status(200).json({ success: true });
+  });
 });
-
-
