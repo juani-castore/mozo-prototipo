@@ -2,6 +2,15 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+const formatArs = (n) =>
+  typeof n === "number"
+    ? new Intl.NumberFormat("es-AR", {
+        style: "currency",
+        currency: "ARS",
+        maximumFractionDigits: 0,
+      }).format(n)
+    : n;
+
 const OrderConfirmation = () => {
   const [params] = useSearchParams();
   const [orderId, setOrderId] = useState(null);
@@ -27,6 +36,28 @@ const OrderConfirmation = () => {
         alert("Pago no válido.");
         setLoading(false);
         return;
+      }
+
+      // ✅ Fallback seguro si el usuario refresca la página
+      const lastOrderRaw = localStorage.getItem("lastOrder");
+      if (!localStorage.getItem("orderData") && lastOrderRaw) {
+        try {
+          const lastOrder = JSON.parse(lastOrderRaw);
+          if (lastOrder?.mp?.paymentId === paymentId) {
+            setOrderId(lastOrder.orderId);
+            setOrderSummary(lastOrder.orderData);
+            setMpInfo((prev) => ({
+              ...prev,
+              paymentId: lastOrder.mp.paymentId || prev.paymentId,
+              status: lastOrder.mp.status || prev.status,
+              preferenceId: lastOrder.mp.preferenceId || prev.preferenceId,
+            }));
+            setLoading(false);
+            return; // 🔒 no re-confirmamos el pago
+          }
+        } catch {
+          // si hay algo raro, seguimos con el flujo normal
+        }
       }
 
       const orderDataRaw = localStorage.getItem("orderData");
@@ -81,7 +112,7 @@ const OrderConfirmation = () => {
               savedAt: new Date().toISOString(),
             })
           );
-        } catch (_) {
+        } catch {
           // si falla storage, no afecta al flujo principal
         }
 
@@ -103,14 +134,29 @@ const OrderConfirmation = () => {
     return <p className="text-center mt-10">Procesando pedido...</p>;
   }
 
+  // Texto explicativo con hora de retiro si existe
+  const retiroFrase =
+    orderSummary?.pickupTime && orderSummary.pickupTime !== ""
+      ? `Ya podés pasar por la barra del FUD a las ${orderSummary.pickupTime} para retirar tu pedido. `
+      : "Ya podés pasar por la barra del FUD para retirar tu pedido cuando esté listo. ";
+
   return (
     <div className="max-w-lg mx-auto mt-10 text-center">
       <h1 className="text-2xl font-bold text-green-700 mb-2">¡Gracias por tu compra!</h1>
       <p className="text-lg">Tu número de pedido es:</p>
       <h2 className="text-4xl font-bold text-brick my-3">{orderId}</h2>
-      <p className="text-sm text-gray-600 mb-6">Guardá este número o sacale una captura.</p>
+      <p className="text-sm text-gray-600 mb-2">
+        Guardá este número o sacale una captura.
+      </p>
 
-      {/* Resumen del pedido (desde localStorage) */}
+      {/* Explicación simple para el cliente */}
+      <p className="text-sm text-gray-700 mb-6 px-2">
+        {retiroFrase}
+        Acercate por la barra de cosas dulces y pedile tu pedido a algún empleado
+        mostrando o diciendo tu número de pedido y tu nombre.
+      </p>
+
+      {/* Resumen del pedido (desde localStorage o lastOrder) */}
       {orderSummary && (
         <div className="text-left bg-white/70 rounded-lg p-4 shadow-sm border">
           <h3 className="font-semibold text-gray-800 mb-2">Resumen</h3>
@@ -146,7 +192,7 @@ const OrderConfirmation = () => {
                       {it.quantity}× {it.name}
                     </span>
                     {typeof it.price === "number" && (
-                      <span>${(it.price * it.quantity).toLocaleString()}</span>
+                      <span>{formatArs(it.price * it.quantity)}</span>
                     )}
                   </li>
                 ))}
@@ -158,13 +204,13 @@ const OrderConfirmation = () => {
           {typeof orderSummary?.total === "number" && (
             <div className="mt-3 flex justify-between text-sm font-semibold">
               <span>Total</span>
-              <span>${orderSummary.total.toLocaleString()}</span>
+              <span>{formatArs(orderSummary.total)}</span>
             </div>
           )}
         </div>
       )}
 
-      {/* Info de pago (desde la URL) */}
+      {/* Info de pago (desde la URL o fallback) */}
       {(mpInfo?.paymentId || mpInfo?.status) && (
         <div className="text-left bg-white/70 rounded-lg p-4 shadow-sm border mt-4">
           <h3 className="font-semibold text-gray-800 mb-2">Pago</h3>
@@ -202,12 +248,12 @@ const OrderConfirmation = () => {
                     .map(
                       (it) =>
                         `• ${it.quantity}× ${it.name}${
-                          it.price ? ` ($${it.price})` : ""
+                          it.price ? ` (${formatArs(it.price)})` : ""
                         }`
                     )
                     .join("\n") +
                   (typeof orderSummary.total === "number"
-                    ? `\nTotal: $${orderSummary.total}`
+                    ? `\nTotal: ${formatArs(orderSummary.total)}`
                     : "")
               )}`}
               target="_blank"
