@@ -19,6 +19,7 @@ const OrderConfirmation = () => {
   // Estados para enriquecer la UI sin tocar backend
   const [orderSummary, setOrderSummary] = useState(null);
   const [mpInfo, setMpInfo] = useState({});
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const processOrder = async () => {
@@ -140,17 +141,108 @@ const OrderConfirmation = () => {
       ? `Ya podés pasar por la barra del FUD a las ${orderSummary.pickupTime} para retirar tu pedido. `
       : "Ya podés pasar por la barra del FUD para retirar tu pedido cuando esté listo. ";
 
+  const copyOrderId = async () => {
+    try {
+      await navigator.clipboard.writeText(String(orderId));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  };
+
+  // 👉 Descargar PDF con jsPDF instalado localmente + fallback TXT si algo falla
+  const downloadPdf = async () => {
+    const filenameBase = `pedido-fud-${orderId || "sin-numero"}`;
+
+    const lines = [];
+    lines.push(`Pedido FUD #${orderId ?? ""}`);
+    lines.push(`----------------------------`);
+    if (orderSummary?.customerName) lines.push(`Cliente: ${orderSummary.customerName}`);
+    if (orderSummary?.email) lines.push(`Email: ${orderSummary.email}`);
+    if (orderSummary?.pickupTime) lines.push(`Retiro: ${orderSummary.pickupTime}`);
+    if (orderSummary?.comments) lines.push(`Notas: ${orderSummary.comments}`);
+    lines.push("");
+    lines.push("Items:");
+    if (Array.isArray(orderSummary?.cart)) {
+      orderSummary.cart.forEach((it) => {
+        const price =
+          typeof it.price === "number" ? formatArs(it.price * (it.quantity || 1)) : "";
+        lines.push(`• ${it.quantity || 1}× ${it.name}${price ? ` - ${price}` : ""}`);
+      });
+    }
+    if (typeof orderSummary?.total === "number") {
+      lines.push("");
+      lines.push(`Total: ${formatArs(orderSummary.total)}`);
+    }
+    lines.push("");
+    if (mpInfo?.paymentId) lines.push(`Payment ID: ${mpInfo.paymentId}`);
+    if (mpInfo?.status) lines.push(`Estado: ${mpInfo.status}`);
+    lines.push(`Generado: ${new Date().toLocaleString()}`);
+
+    try {
+      // paquete local (no carga hasta hacer click)
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF();
+
+      const marginX = 14;
+      const lineHeight = 8;
+      let y = 16;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text(`Pedido FUD #${orderId ?? ""}`, marginX, y);
+      y += 6;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      lines.slice(1).forEach((l) => {
+        if (y > 280) {
+          doc.addPage();
+          y = 16;
+        }
+        y += lineHeight;
+        doc.text(l, marginX, y);
+      });
+
+      doc.save(`${filenameBase}.pdf`);
+    } catch (e) {
+      // Fallback TXT: nunca rompe el flujo
+      const blob = new Blob([lines.join("\n")], {
+        type: "text/plain;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${filenameBase}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto mt-10 text-center">
       <h1 className="text-2xl font-bold text-green-700 mb-2">¡Gracias por tu compra!</h1>
       <p className="text-lg">Tu número de pedido es:</p>
       <h2 className="text-4xl font-bold text-brick my-3">{orderId}</h2>
+
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <button
+          onClick={copyOrderId}
+          className="px-3 py-1 text-sm rounded border hover:bg-gray-50"
+          aria-label="Copiar número de pedido"
+        >
+          Copiar número
+        </button>
+        {copied && <span className="text-xs text-green-700">¡Copiado!</span>}
+      </div>
+
       <p className="text-sm text-gray-600 mb-2">
         Guardá este número o sacale una captura.
       </p>
 
       {/* Explicación simple para el cliente */}
-      <p className="text-sm text-gray-700 mb-6 px-2">
+      <p className="text-sm text-gray-700 mb-6 px-2 leading-relaxed">
         {retiroFrase}
         Acercate por la barra de cosas dulces y pedile tu pedido a algún empleado
         mostrando o diciendo tu número de pedido y tu nombre.
@@ -158,7 +250,7 @@ const OrderConfirmation = () => {
 
       {/* Resumen del pedido (desde localStorage o lastOrder) */}
       {orderSummary && (
-        <div className="text-left bg-white/70 rounded-lg p-4 shadow-sm border">
+        <div className="text-left bg-white/70 rounded-lg p-4 shadow-sm border print-card">
           <h3 className="font-semibold text-gray-800 mb-2">Resumen</h3>
 
           {orderSummary?.customerName && (
@@ -212,7 +304,7 @@ const OrderConfirmation = () => {
 
       {/* Info de pago (desde la URL o fallback) */}
       {(mpInfo?.paymentId || mpInfo?.status) && (
-        <div className="text-left bg-white/70 rounded-lg p-4 shadow-sm border mt-4">
+        <div className="text-left bg-white/70 rounded-lg p-4 shadow-sm border mt-4 print-card">
           <h3 className="font-semibold text-gray-800 mb-2">Pago</h3>
           {mpInfo.paymentId && (
             <p className="text-sm">
@@ -227,14 +319,14 @@ const OrderConfirmation = () => {
         </div>
       )}
 
-      {/* Acciones útiles: solo si tenemos orderId */}
+      {/* Acciones: Descargar PDF + WhatsApp */}
       {orderId && (
         <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           <button
             className="px-4 py-2 rounded-md bg-brick text-white hover:opacity-90"
-            onClick={() => window.print()}
+            onClick={downloadPdf}
           >
-            Imprimir
+            Descargar PDF
           </button>
 
           {orderSummary?.cart && (
