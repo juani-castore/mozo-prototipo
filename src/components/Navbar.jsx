@@ -6,7 +6,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Estado para el menú colapsable
 
   return (
-    <nav className="bg-brick px-4 py-4 shadow-md">
+    <nav className="bg-brick px-4 py-4 shadow-md border-b border-brick/10">
       <div className="flex justify-between items-center">
         {/* Logo */}
         <div>
