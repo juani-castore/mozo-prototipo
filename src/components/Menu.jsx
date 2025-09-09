@@ -124,7 +124,14 @@ const Menu = () => {
       >
         Ir al Carrito
       </button>
-
+      <button
+        className="fixed bottom-4 left-4 z-50 bg-green-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-700 shadow-lg"
+        onClick={() => 
+          window.open('https://wa.me/5491150227179?text=Hola%2C%20quiero%20hablar%20con%20MOZO', '_blank')
+        }
+      >
+        Hablar con MOZO
+      </button>
       {recommendedProducts.length > 0 && (
         <div className="mb-12 w-full max-w-6xl">
           <h3 className="text-2xl font-bold text-gold mb-4 text-center">Recomendados</h3>
