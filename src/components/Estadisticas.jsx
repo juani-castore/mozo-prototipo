@@ -2,6 +2,32 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Bar, Line, Pie, Doughnut } from 'react-chartjs-2';
+
+// Registrar componentes de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 const COMISION = 0.05;
 
@@ -16,19 +42,19 @@ const Estadisticas = () => {
   const [ingresoBrutoTotal, setIngresoBrutoTotal] = useState(0);
   const [ventasPorHora, setVentasPorHora] = useState({});
   const [rentabilidadProductos, setRentabilidadProductos] = useState([]);
-  // Mejorados: márgenes globales e individuales
   const [margenCostoGlobal, setMargenCostoGlobal] = useState(35);
   const [margenesIndividuales, setMargenesIndividuales] = useState({});
   const [datosBase, setDatosBase] = useState({});
   const [editandoProducto, setEditandoProducto] = useState(null);
 
-  // Nuevo: estados para secciones plegables
+  // Nuevo: estados para secciones plegables (agregamos graficos)
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({
     resumen: true,
     diasSemana: false,
     productos: false,
     franjas: true,
     rentabilidad: true,
+    graficos: true, // Nueva sección
     ingresosPorDia: false
   });
 
@@ -90,7 +116,6 @@ const Estadisticas = () => {
       });
 
       setDatosBase(productosRentabilidad);
-
       setTotalesPorDia(agrupado);
       setFechasDisponibles(Object.keys(agrupado).sort().reverse());
       setTotalPedidos(pedidos.length);
@@ -112,19 +137,16 @@ const Estadisticas = () => {
         }
       }
       setIngresosPorDiaSemana(resumen);
-
       setVentasPorHora(horasVenta);
     };
 
     fetchPedidos();
   }, []);
 
-  // Mejorado: useEffect para recalcular rentabilidad
   useEffect(() => {
     if (Object.keys(datosBase).length === 0) return;
 
     const rentabilidad = Object.entries(datosBase).map(([nombre, datos]) => {
-      // Usar margen individual si existe, sino el global
       const margenUsar = margenesIndividuales[nombre] !== undefined 
         ? margenesIndividuales[nombre] 
         : margenCostoGlobal;
@@ -204,11 +226,184 @@ const Estadisticas = () => {
     return 'bg-green-100 border-green-500 text-green-700';
   };
 
+  // NUEVAS FUNCIONES PARA GRÁFICOS
+  
+  // Gráfico de barras: Ventas por día de la semana
+  const getGraficoDiasSemana = () => {
+    const dias = Object.keys(ingresosPorDiaSemana);
+    const valores = Object.values(ingresosPorDiaSemana);
+
+    return {
+      labels: dias,
+      datasets: [
+        {
+          label: 'Promedio de Ventas ($)',
+          data: valores,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 205, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(199, 199, 199, 0.6)',
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 205, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(199, 199, 199, 1)',
+          ],
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Gráfico de línea: Ventas por hora
+  const getGraficoVentasPorHora = () => {
+    const maxPedidosHora = Math.max(...Object.values(ventasPorHora).map(h => h.pedidos));
+    const horasOrdenadas = Object.entries(ventasPorHora)
+      .sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+
+    return {
+      labels: horasOrdenadas.map(([hora]) => `${hora}:00`),
+      datasets: [
+        {
+          label: 'Pedidos por Hora',
+          data: horasOrdenadas.map(([, datos]) => datos.pedidos),
+          borderColor: 'rgb(147, 51, 234)',
+          backgroundColor: 'rgba(147, 51, 234, 0.1)',
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: 'Ventas por Hora ($)',
+          data: horasOrdenadas.map(([, datos]) => datos.total),
+          borderColor: 'rgb(34, 197, 94)',
+          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+          tension: 0.4,
+          yAxisID: 'y1',
+        },
+      ],
+    };
+  };
+
+  // Gráfico de dona: Top productos más vendidos
+  const getGraficoProductos = () => {
+    const top10 = productosVendidos.slice(0, 10);
+    
+    return {
+      labels: top10.map(p => p.nombre),
+      datasets: [
+        {
+          data: top10.map(p => p.cantidad),
+          backgroundColor: [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+            '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+          ],
+          hoverBackgroundColor: [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+            '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+          ],
+        },
+      ],
+    };
+  };
+
+  // Gráfico de barras: Rentabilidad por producto
+  const getGraficoRentabilidad = () => {
+    const top10 = rentabilidadProductos.slice(0, 10);
+    
+    return {
+      labels: top10.map(p => p.nombre.length > 15 ? p.nombre.substring(0, 15) + '...' : p.nombre),
+      datasets: [
+        {
+          label: 'Ingresos ($)',
+          data: top10.map(p => p.ingresoTotal),
+          backgroundColor: 'rgba(34, 197, 94, 0.6)',
+          borderColor: 'rgba(34, 197, 94, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: 'Costos ($)',
+          data: top10.map(p => p.costoTotal),
+          backgroundColor: 'rgba(239, 68, 68, 0.6)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: 'Ganancia ($)',
+          data: top10.map(p => p.gananciaBruta),
+          backgroundColor: 'rgba(59, 130, 246, 0.6)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
+  // Configuraciones de gráficos
+  const opcionesBasicas = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+  };
+
+  const opcionesVentasHora = {
+    responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Hora del día'
+        }
+      },
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        title: {
+          display: true,
+          text: 'Número de Pedidos'
+        }
+      },
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Ventas ($)'
+        },
+        grid: {
+          drawOnChartArea: false,
+        },
+      },
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Pedidos y Ventas por Hora'
+      }
+    }
+  };
+
   const datosFiltrados = Object.entries(totalesPorDia)
     .filter(([fecha]) => fecha.includes(busqueda))
     .sort((a, b) => b[0].localeCompare(a[0]));
 
-  // Nueva: calcular estadísticas de franjas horarias
   const maxPedidosHora = Math.max(...Object.values(ventasPorHora).map(h => h.pedidos));
   const horasOrdenadas = Object.entries(ventasPorHora)
     .sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
@@ -217,7 +412,7 @@ const Estadisticas = () => {
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-4xl font-extrabold text-center text-brick mb-10 uppercase tracking-wide">Estadísticas de Ventas</h2>
 
-      <div className="grid gap-6 max-w-4xl mx-auto">
+      <div className="grid gap-6 max-w-6xl mx-auto">
         
         {/* Resumen General - Plegable */}
         <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow">
@@ -235,6 +430,81 @@ const Estadisticas = () => {
               <p className="text-gray-700">Total de pedidos: <strong>{totalPedidos}</strong></p>
               <p className="text-gray-700">Ingreso bruto total: <strong>${ingresoBrutoTotal.toFixed(2)}</strong></p>
               <p className="text-gray-700">Ticket promedio: <strong>${ticketPromedio.toFixed(2)}</strong></p>
+            </div>
+          )}
+        </div>
+
+        {/* NUEVA SECCIÓN: Gráficos - Plegable */}
+        <div className="bg-indigo-50 border-l-4 border-indigo-500 rounded-lg shadow">
+          <div 
+            className="flex justify-between items-center p-6 cursor-pointer hover:bg-indigo-100 transition-colors"
+            onClick={() => toggleSeccion('graficos')}
+          >
+            <h3 className="text-2xl font-semibold text-indigo-700">📈 Gráficos y Visualizaciones</h3>
+            <span className="text-indigo-700 font-bold text-xl">
+              {seccionesAbiertas.graficos ? '−' : '+'}
+            </span>
+          </div>
+          {seccionesAbiertas.graficos && (
+            <div className="px-6 pb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {/* Gráfico: Ventas por día de la semana */}
+                <div className="bg-white p-4 rounded-lg shadow border">
+                  <h4 className="text-lg font-semibold mb-3 text-center">Ventas Promedio por Día</h4>
+                  <div className="h-64">
+                    <Bar data={getGraficoDiasSemana()} options={opcionesBasicas} />
+                  </div>
+                </div>
+
+                {/* Gráfico: Productos más vendidos */}
+                <div className="bg-white p-4 rounded-lg shadow border">
+                  <h4 className="text-lg font-semibold mb-3 text-center">Top 10 Productos Más Vendidos</h4>
+                  <div className="h-64">
+                    <Doughnut data={getGraficoProductos()} options={opcionesBasicas} />
+                  </div>
+                </div>
+
+                {/* Gráfico: Ventas por hora (ocupa 2 columnas) */}
+                <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow border">
+                  <h4 className="text-lg font-semibold mb-3 text-center">Distribución de Pedidos y Ventas por Hora</h4>
+                  <div className="h-80">
+                    <Line data={getGraficoVentasPorHora()} options={opcionesVentasHora} />
+                  </div>
+                </div>
+
+                {/* Gráfico: Rentabilidad por producto */}
+                <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow border">
+                  <h4 className="text-lg font-semibold mb-3 text-center">Análisis de Rentabilidad - Top 10 Productos</h4>
+                  <div className="h-80">
+                    <Bar data={getGraficoRentabilidad()} options={{
+                      ...opcionesBasicas,
+                      plugins: {
+                        ...opcionesBasicas.plugins,
+                        title: {
+                          display: true,
+                          text: 'Comparación: Ingresos vs Costos vs Ganancia'
+                        }
+                      },
+                      scales: {
+                        x: {
+                          title: {
+                            display: true,
+                            text: 'Productos'
+                          }
+                        },
+                        y: {
+                          title: {
+                            display: true,
+                            text: 'Monto ($)'
+                          }
+                        }
+                      }
+                    }} />
+                  </div>
+                </div>
+
+              </div>
             </div>
           )}
         </div>
