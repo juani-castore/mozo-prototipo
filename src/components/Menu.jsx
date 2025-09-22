@@ -59,56 +59,117 @@ const Menu = () => {
   const renderProductCard = (product, isRecommended = false) => {
     const isOutOfStock = product.stock <= 0;
     const baseStyle = isRecommended
-      ? "border bg-white ring-2 ring-gold/40"
-      : "border bg-white";
+      ? "border-2 border-gold/40 bg-gradient-to-br from-white to-gold/5 ring-2 ring-gold/20 shadow-xl"
+      : "border border-gray-200 bg-white shadow-lg hover:shadow-xl";
     const bgStyle = isOutOfStock
-      ? "opacity-60"
-      : "text-brick";
+      ? "opacity-60 grayscale"
+      : "";
 
     return (
       <div
         key={product.id}
-        className={`relative shadow-md hover:shadow-lg rounded-xl flex flex-col items-center
-            transition-transform motion-safe:hover:-translate-y-0.5 ${baseStyle} ${bgStyle} p-4`}
+        className={`relative rounded-2xl flex flex-col overflow-hidden
+            transition-all duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:scale-[1.02] 
+            ${baseStyle} ${bgStyle} group`}
       >
+        {/* Header con precio destacado */}
+        <div className={`p-4 pb-2 ${isRecommended ? 'bg-gradient-to-r from-gold/10 to-gold/20' : 'bg-gray-50/50'}`}>
+          <div className="flex justify-between items-start mb-2">
+            <div className="flex-1">
+              <h3 className="text-lg font-black text-brick tracking-tight leading-tight mb-1">
+                {product.name}
+              </h3>
+              {isRecommended && (
+                <div className="inline-flex items-center bg-gold/90 text-brick text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                  ⭐ Recomendado
+                </div>
+              )}
+            </div>
+            <div className="text-right">
+              <div className={`text-2xl font-black ${isRecommended ? 'text-brick' : 'text-brick'} mb-1`}>
+                ${product.price}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Estado de stock */}
         {isOutOfStock && (
-          <div className="absolute top-2 right-2 bg-red-600/90 text-white text-[10px] tracking-wide
-                font-bold px-2 py-1 rounded shadow-sm">
+          <div className="absolute top-3 right-3 bg-red-600/95 text-white text-xs tracking-wide
+                font-bold px-3 py-1.5 rounded-full shadow-lg z-10 border border-red-500">
             AGOTADO
           </div>
         )}
-        <h3 className="text-xl font-extrabold mb-1 text-center tracking-tight">{product.name}</h3>
-        <p className="text-2xl font-black mb-3 text-center">${product.price}</p>
-        {product.description && (
-          <>
+
+        {/* Contenido principal */}
+        <div className="p-4 pt-2 flex-1 flex flex-col">
+          {/* Descripción expandible */}
+          {product.description && (
+            <div className="mb-4">
+              <button
+                className={`text-sm font-semibold transition-colors duration-200 ${
+                  isRecommended ? "text-brick hover:text-brick-light" : "text-brick hover:text-brick-light"
+                } hover:underline flex items-center gap-1`}
+                onClick={() => toggleExpand(product.id)}
+              >
+                {expanded[product.id] ? (
+                  <>
+                    <span>Ver menos</span>
+                    <svg className="w-3 h-3 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    <span>Ver descripción</span>
+                    <svg className="w-3 h-3 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </>
+                )}
+              </button>
+              {expanded[product.id] && (
+                <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-xl shadow-inner">
+                  <p className="text-sm text-gray-700 leading-relaxed">{product.description}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Botón de agregar al carrito */}
+          <div className="mt-auto">
             <button
-              className={`text-sm ${
-                isRecommended ? "text-brick" : "text-brick"
-              } hover:underline mb-2`}
-              onClick={() => toggleExpand(product.id)}
+              onClick={() => handleAddToCart(product)}
+              disabled={isOutOfStock}
+              className={`font-bold px-4 py-3 rounded-xl transition-all duration-200 w-full text-sm
+                         transform motion-safe:active:scale-95 ${
+                isOutOfStock
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-inner"
+                  : isRecommended
+                  ? "bg-brick text-white hover:bg-brick-light shadow-lg hover:shadow-xl motion-safe:hover:-translate-y-0.5"
+                  : "bg-brick text-white hover:bg-brick-light shadow-lg hover:shadow-xl motion-safe:hover:-translate-y-0.5"
+              }`}
             >
-              {expanded[product.id] ? "Ver menos" : "Ver más"}
+              {isOutOfStock ? (
+                <div className="flex items-center justify-center gap-2">
+                  <span>😞</span>
+                  <span>Agotado</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <span>🛒</span>
+                  <span>Agregar al carrito</span>
+                </div>
+              )}
             </button>
-            {expanded[product.id] && (
-              <p className="text-sm bg-white border border-brick/10 text-brick p-3 rounded-lg shadow-sm w-full text-center">
-                {product.description}
-              </p>
-            )}
-          </>
+          </div>
+        </div>
+
+        {/* Efecto de brillo en hover para recomendados */}
+        {isRecommended && !isOutOfStock && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                         opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
         )}
-        <button
-          onClick={() => handleAddToCart(product)}
-          disabled={isOutOfStock}
-          className={`font-bold px-4 py-2 rounded-xl transition-all w-full ${
-            isOutOfStock
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : isRecommended
-              ? "bg-brick text-white hover:bg-brick-light"
-              : "bg-brick text-white hover:bg-brick-light"
-          }`}
-        >
-          {isOutOfStock ? "Agotado" : "Agregar al carrito"}
-        </button>
       </div>
     );
   };
@@ -116,17 +177,35 @@ const Menu = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-5 py-8
                 pb-28 sm:pb-12 [padding-bottom:env(safe-area-inset-bottom)]">
-      <h1 className="text-4xl md:text-5xl font-bold text-center text-brick mb-2">FUD TIME</h1>
-      <h2 className="text-3xl md:text-4xl font-bold text-center text-brick mb-6">Menú</h2>
+      
+      {/* Header mejorado */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl md:text-5xl font-black text-brick mb-2 tracking-tight">
+          FUD TIME
+        </h1>
+        <h2 className="text-3xl md:text-4xl font-bold text-brick mb-2 tracking-wide">
+          Menú
+        </h2>
+        <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-4" />
+        <p className="text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
+          Descubre nuestros deliciosos productos preparados con los mejores ingredientes
+        </p>
+      </div>
 
+      {/* Botones fijos mejorados */}
       <button
         className="fixed bottom-4 right-4 z-50 bg-gold text-brick font-extrabold px-6 py-3 text-base
              md:px-7 md:py-3.5 md:text-lg rounded-xl shadow-xl ring-2 ring-yellow-300/40
-             hover:shadow-2xl hover:translate-y-0.5 transition-all"
+             hover:shadow-2xl motion-safe:hover:-translate-y-0.5 transition-all tracking-tight
+             backdrop-blur-sm border border-yellow-400/20"
         onClick={() => navigate("/cart")}
       >
-        Ir al Carrito
+        <span className="flex items-center gap-2">
+          <span>🛒</span>
+          <span>Ir al Carrito</span>
+        </span>
       </button>
+
       <button
         className="fixed bottom-20 left-4 md:bottom-4 md:left-4 z-40 bg-white/60 backdrop-blur
              border-2 border-green-600 text-green-700 font-semibold px-3 py-2 text-sm
@@ -138,33 +217,47 @@ const Menu = () => {
       >
         Hablar con MOZO
       </button>
+
+      {/* Sección de recomendados mejorada */}
       {recommendedProducts.length > 0 && (
-        <div className="mb-12 w-full max-w-7xl">
-          <h3 className="text-2xl font-bold text-gold text-center">Recomendados</h3>
-          <div className="h-px bg-brick/10 w-full max-w-6xl my-6 mx-auto" />
+        <div className="mb-16 w-full max-w-7xl">
+          <div className="text-center mb-8">
+            <h3 className="text-3xl font-black text-gold mb-2 tracking-tight">
+              ⭐ Productos Recomendados
+            </h3>
+            <p className="text-gray-600 font-medium">Los favoritos de nuestros clientes</p>
+          </div>
+          <div className="h-1 bg-gradient-to-r from-transparent via-gold/50 to-transparent w-full max-w-md mx-auto mb-8" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {recommendedProducts.map((product) => renderProductCard(product, true))}
           </div>
         </div>
       )}
 
-      {Object.keys(groupedProducts).map((category) => (
-        <div key={category} className="mb-12 w-full max-w-6xl">
-          <h3 className="text-xl font-semibold text-brick mb-6 text-center tracking-wide">
-            {category}
-          </h3>
-          <div className="h-px bg-brick/10 w-full max-w-6xl my-6 mx-auto" />
+      {/* Secciones de categorías mejoradas */}
+      {Object.keys(groupedProducts).map((category, index) => (
+        <div key={category} className="mb-16 w-full max-w-6xl">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-brick mb-2 tracking-wide">
+              {category}
+            </h3>
+            <div className="w-16 h-0.5 bg-brick/30 mx-auto" />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {groupedProducts[category].map((product) => renderProductCard(product))}
           </div>
         </div>
       ))}
 
+      {/* Notificación mejorada */}
       {notification && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2
-                  bg-green-600/90 backdrop-blur text-white px-5 py-2.5
-                  rounded-full shadow-lg">
-          {notification}
+        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50
+                  bg-green-600/95 backdrop-blur text-white px-6 py-3
+                  rounded-full shadow-xl border border-green-500/30
+                  flex items-center gap-2 font-semibold
+                  motion-safe:animate-bounce">
+          <span>✅</span>
+          <span>{notification}</span>
         </div>
       )}
     </div>
