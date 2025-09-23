@@ -94,6 +94,48 @@ exports.generarLinkDePago = onRequest({ secrets: [MP_TOKEN] }, async (req, res) 
   });
 });
 
+// generar link de pago old url (para no romper versiones anteriores)
+exports.generarLinkDePagoOld = onRequest({ secrets: [MP_TOKEN] }, async (req, res) => {
+  corsHandler(req, res, async () => {
+    const token = MP_TOKEN.value();
+    const mp = new MercadoPagoConfig({ accessToken: token });
+    const preferenceApi = new Preference(mp);
+    const { carrito, mesa, orderData } = req.body || {};
+    if (!Array.isArray(carrito) || !orderData) {
+      return res.status(400).json({ error: "Datos inválidos" });
+    }
+    try {
+      const paymentId = uuidv4();
+      const preferenceData = {
+        items: carrito.map(item => ({
+          title: item.name,
+          quantity: item.quantity,
+          unit_price: Number(item.price),
+          currency_id: "ARS",
+        })),
+        back_urls: {
+          success: `${oldBaseUrl}/order-confirmation`,
+          failure: `${oldBaseUrl}/payment-failed`,
+          pending: `${oldBaseUrl}/payment-pending`,
+        },
+        auto_return: "approved",
+        metadata: { mesa },
+        external_reference: paymentId,
+      };
+      const response = await preferenceApi.create({ body: preferenceData });
+      await db.collection("pendingOrders").doc(paymentId).set({
+        orderData,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      res.status(200).json({ init_point: response.init_point, paymentId });
+    } catch (err) {
+      console.error("Error creando preferencia:", err);
+      res.status(500).json({ error: "Error interno" });
+    }
+  });
+});
+
+
 // ⚡ confirmarPago desde frontend
 exports.confirmarPago = onRequest({ secrets: [MP_TOKEN] }, (req, res) => {
   corsHandler(req, res, async () => {
