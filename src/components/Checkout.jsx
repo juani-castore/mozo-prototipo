@@ -3,6 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { CartContext } from "../CartContext";
 
 const Checkout = () => {
+  const FN_BASE_URL = window.location.host.includes("mozo-prototipo.vercel.app")
+    ? "https://us-central1-prototipo-mozo.cloudfunctions.net/generarLinkDePagoOld"
+    : "https://us-central1-prototipo-mozo.cloudfunctions.net/generarLinkDePago";
+
   const { cart } = useContext(CartContext);
   const navigate = useNavigate();
 
@@ -68,7 +72,7 @@ const Checkout = () => {
       };
 
       const response = await fetch(
-        "https://us-central1-prototipo-mozo.cloudfunctions.net/generarLinkDePago",
+        FN_BASE_URL, // ✅ Usa la variable dinámica
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

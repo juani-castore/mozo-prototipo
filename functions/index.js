@@ -9,7 +9,12 @@ admin.initializeApp();
 const db = admin.firestore();
 
 const MP_TOKEN = defineSecret("MP_TOKEN");
-const baseUrl = "https://mozo-prototipo.vercel.app";
+
+const oldBaseUrl = "https://mozo-prototipo.vercel.app"; // Cambiar a tu dominio
+const baseUrl = "https://mozo.app"; // Cambiar a tu dominio
+
+// Configurar CORS
+
 const corsHandler = cors({ origin: true });
 
 // 🧾 guarda el pedido confirmado en /orders y elimina de /pendingOrders
