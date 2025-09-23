@@ -324,29 +324,34 @@ const Checkout = () => {
         </div>
       </div>
 
-      {/* Botón fijo de WhatsApp - Estilo consistente */}
+      {/* Botones fijos - Copiados exactamente de Cart */}
       <button
-        className="fixed bottom-20 left-4 md:bottom-4 md:left-4 z-40 bg-white/60 backdrop-blur
-             border-2 border-green-600 text-green-700 font-semibold px-3 py-2 text-sm
-             md:px-4 md:py-2 md:text-base rounded-full hover:bg-green-50 hover:border-green-700
-             shadow-sm transition-all"
+        className="fixed bottom-4 left-4 z-40 bg-white/60 backdrop-blur
+             border-2 border-green-600 text-green-700 font-semibold rounded-full 
+             hover:bg-green-50 hover:border-green-700 shadow-sm transition-all
+             px-6 py-3 text-base min-[480px]:px-5 min-[480px]:py-2.5 min-[480px]:text-sm 
+             min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm
+             min-[360px]:px-3 min-[360px]:py-2 min-[360px]:text-xs"
         onClick={() => 
           window.open('https://wa.me/5491150227179?text=Hola%2C%20quiero%20hablar%20con%20MOZO', '_blank')
         }
       >
-        Hablar con MOZO
+        <span className="min-[480px]:hidden">MOZO</span>
+        <span className="hidden min-[480px]:inline">Hablar con MOZO</span>
       </button>
 
-      {/* Botón fijo para volver al menú */}
-      <Link to="/">
-        <button
-          className="fixed bottom-4 right-4 z-50 bg-gold text-brick font-extrabold px-6 py-3 text-base
-               md:px-7 md:py-3.5 md:text-lg rounded-xl shadow-xl ring-2 ring-yellow-300/40
-               hover:shadow-2xl motion-safe:hover:-translate-y-0.5 transition-all tracking-tight"
-        >
-          Volver al Menú
-        </button>
-      </Link>
+      <button
+        onClick={() => window.location.href = '/'}
+        className="fixed bottom-4 right-4 z-50 bg-gold text-brick font-extrabold rounded-xl 
+             shadow-xl ring-2 ring-yellow-300/40 hover:shadow-2xl motion-safe:hover:-translate-y-0.5 
+             transition-all tracking-tight
+             px-6 py-3 text-base min-[480px]:px-5 min-[480px]:py-2.5 min-[480px]:text-sm 
+             min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm
+             min-[360px]:px-3 min-[360px]:py-2 min-[360px]:text-xs"
+      >
+        <span className="min-[520px]:hidden">Menú</span>
+        <span className="hidden min-[520px]:inline">Volver al Menú</span>
+      </button>
     </div>
   );
 };
