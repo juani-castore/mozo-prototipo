@@ -1,36 +1,35 @@
 // RestauranteDashboard.jsx
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const RestauranteDashboard = () => {
   const navigate = useNavigate();
 
-  const clientId = "5793584130197915";
-  const redirectUri = "https://callbackmp-o3y6kyilea-uc.a.run.app";
-
-  const authUrl = `https://auth.mercadopago.com.ar/authorization?client_id=${clientId}&response_type=code&platform_id=mp&redirect_uri=${encodeURIComponent(redirectUri)}`;
-
   return (
-    <div className="flex flex-col justify-center items-center h-screen bg-gray-100">
-      <h2 className="text-3xl font-semibold mb-6">Panel de Administración</h2>
-      <div className="flex gap-4">
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 px-4 py-8">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl md:text-5xl font-black text-brick mb-2 tracking-tight">MOZO</h1>
+        <h2 className="text-3xl md:text-4xl font-black text-brick mb-4 tracking-tight">Panel de Administración</h2>
+        <div className="w-24 h-1 bg-gradient-to-r from-gold/10 via-gold to-gold/10 mx-auto" />
+      </div>
+      
+      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
         <button
-          className="bg-brick text-white px-6 py-2 rounded shadow hover:bg-brick-light"
+          className="w-full bg-brick text-white px-6 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:bg-brick-light font-black tracking-tight border-2 border-brick transition-all duration-200 motion-safe:hover:-translate-y-0.5"
           onClick={() => navigate("/restaurante/pedidos")}
         >
-          Pedidos
+          📋 Pedidos
         </button>
         <button
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700"
+          className="w-full bg-gold text-brick px-6 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:bg-white font-black tracking-tight border-2 border-gold transition-all duration-200 motion-safe:hover:-translate-y-0.5"
           onClick={() => navigate("/restaurante/menu")}
         >
-          Menú
+          🍽️ Menú
         </button>
         <button
-          className="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700"
+          className="w-full bg-brick text-white px-6 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:bg-brick-light font-black tracking-tight border-2 border-brick transition-all duration-200 motion-safe:hover:-translate-y-0.5"
           onClick={() => navigate("/restaurante/estadisticas")}
         >
-          Estadísticas
+          📊 Estadísticas
         </button>
       </div>
     </div>

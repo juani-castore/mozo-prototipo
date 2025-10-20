@@ -1,35 +1,14 @@
-import React from "react";
-
 const ProductCard = ({ product, onAddToCart }) => {
   return (
-    <div
-      style={{
-        border: "1px solid var(--brick)",
-        borderRadius: "8px",
-        padding: "1rem",
-        margin: "0.5rem",
-        backgroundColor: "var(--white)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <h3 style={{ marginBottom: "0.5rem", color: "var(--brick)" }}>
+    <div className="border-2 border-brick rounded-xl p-4 m-2 bg-white flex flex-col justify-between items-center shadow-lg hover:shadow-xl transition-all duration-200 motion-safe:hover:-translate-y-1">
+      <h3 className="mb-2 text-brick font-black text-lg tracking-tight">
         {product.nombre}
       </h3>
-      <p style={{ marginBottom: "1rem", color: "var(--gold)" }}>
+      <p className="mb-4 text-gold font-black text-xl">
         ${product.precio}
       </p>
       <button
-        style={{
-          padding: "0.5rem 1rem",
-          backgroundColor: "var(--gold)",
-          border: "none",
-          borderRadius: "5px",
-          color: "white",
-          cursor: "pointer",
-        }}
+        className="px-4 py-2 bg-gold text-brick border-2 border-gold rounded-xl font-black hover:bg-white hover:shadow-lg transition-all duration-200 tracking-tight"
         onClick={onAddToCart}
       >
         Agregar al carrito

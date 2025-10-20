@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 
@@ -6,19 +6,19 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-r from-brick to-brick-light/95 shadow-lg">
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-brick to-brick shadow-xl border-b-2 border-gold/20">
       <div className="mx-auto max-w-7xl px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Logo Mozo" className="h-9 md:h-10 drop-shadow" />
+            <img src={logo} alt="Logo Mozo" className="h-9 md:h-10 drop-shadow-lg" />
           </Link>
 
           {/* Botón hamburguesa (mobile) */}
           <button
             aria-label="Abrir menú"
             aria-expanded={isMenuOpen}
-            className="md:hidden rounded-lg p-2 text-gold/90 hover:bg-white/10 hover:text-gold transition"
+            className="md:hidden rounded-xl p-2 text-gold hover:bg-white/10 hover:text-gold transition-all border-2 border-transparent hover:border-gold/40"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg
@@ -36,19 +36,19 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-2">
             <Link
               to="/"
-              className="px-4 py-2 text-sm font-semibold text-gold hover:text-white rounded-xl border border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition"
+              className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
             >
               Menú
             </Link>
             <Link
               to="/cart"
-              className="px-4 py-2 text-sm font-semibold text-gold hover:text-white rounded-xl border border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition"
+              className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
             >
               Carrito
             </Link>
             <Link
               to="/restaurante"
-              className="px-4 py-2 text-sm font-semibold text-gold hover:text-white rounded-xl border border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition"
+              className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
             >
               Restaurante
             </Link>
@@ -56,7 +56,7 @@ const Navbar = () => {
               href="https://mozo-phi.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 text-sm font-semibold text-brick bg-gold hover:bg-white hover:text-brick rounded-xl shadow-sm transition"
+              className="px-4 py-2 text-sm font-black text-brick bg-gold hover:bg-white hover:text-brick rounded-xl shadow-lg hover:shadow-xl transition-all tracking-tight border-2 border-gold"
             >
               MOZO
             </a>
@@ -69,25 +69,25 @@ const Navbar = () => {
             isMenuOpen ? "max-h-96 mt-3" : "max-h-0"
           }`}
         >
-          <div className="flex flex-col gap-2 rounded-2xl bg-white/5 p-3 backdrop-blur">
+          <div className="flex flex-col gap-2 rounded-2xl bg-white/5 p-3 backdrop-blur border-2 border-white/10">
             <Link
               to="/"
               onClick={() => setIsMenuOpen(false)}
-              className="w-full px-4 py-2 text-sm font-semibold text-gold hover:text-white rounded-lg border border-gold/40 hover:border-white/40 hover:bg-white/10 transition"
+              className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
             >
               Menú
             </Link>
             <Link
               to="/cart"
               onClick={() => setIsMenuOpen(false)}
-              className="w-full px-4 py-2 text-sm font-semibold text-gold hover:text-white rounded-lg border border-gold/40 hover:border-white/40 hover:bg-white/10 transition"
+              className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
             >
               Carrito
             </Link>
             <Link
               to="/restaurante"
               onClick={() => setIsMenuOpen(false)}
-              className="w-full px-4 py-2 text-sm font-semibold text-gold hover:text-white rounded-lg border border-gold/40 hover:border-white/40 hover:bg-white/10 transition"
+              className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
             >
               Restaurante
             </Link>
@@ -96,7 +96,7 @@ const Navbar = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMenuOpen(false)}
-              className="w-full px-4 py-2 text-sm font-semibold text-brick bg-gold hover:bg-white rounded-lg shadow-sm transition"
+              className="w-full px-4 py-2 text-sm font-black text-brick bg-gold hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all tracking-tight border-2 border-gold"
             >
               MOZO
             </a>
