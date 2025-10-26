@@ -1,9 +1,10 @@
 import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../CartContext";
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
+  const navigate = useNavigate();
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => {
@@ -221,7 +222,7 @@ const Cart = () => {
       </button>
 
       <button
-        onClick={() => window.location.href = '/'}
+        onClick={() => navigate('/')}
         className="fixed bottom-4 right-4 z-50 bg-gold text-brick font-extrabold rounded-xl 
              shadow-xl ring-2 ring-yellow-300/40 hover:shadow-2xl motion-safe:hover:-translate-y-0.5 
              transition-all tracking-tight

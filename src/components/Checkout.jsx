@@ -1,13 +1,15 @@
 import { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../CartContext";
 
 const Checkout = () => {
+  // URLs actualizadas después del deploy de Cloud Functions Gen 2
   const FN_BASE_URL = window.location.host.includes("mozo-prototipo.vercel.app")
     ? "https://us-central1-prototipo-mozo.cloudfunctions.net/generarLinkDePagoOld"
     : "https://us-central1-prototipo-mozo.cloudfunctions.net/generarLinkDePago";
  
   const { cart } = useContext(CartContext);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -341,7 +343,7 @@ const Checkout = () => {
       </button>
 
       <button
-        onClick={() => window.location.href = '/'}
+        onClick={() => navigate('/')}
         className="fixed bottom-4 right-4 z-50 bg-gold text-brick font-extrabold rounded-xl 
              shadow-xl ring-2 ring-yellow-300/40 hover:shadow-2xl motion-safe:hover:-translate-y-0.5 
              transition-all tracking-tight

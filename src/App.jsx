@@ -25,7 +25,7 @@ function App() {
   }, [cart]);
 
   return (
-    <Router>
+    <Router basename="/fud">
       <Navbar />
       <Routes>
         <Route path="/" element={<Menu cart={cart} setCart={setCart} />} />

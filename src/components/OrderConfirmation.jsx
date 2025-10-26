@@ -73,7 +73,7 @@ const OrderConfirmation = () => {
       setOrderSummary(orderData);
 
       try {
-        // Confirmar pago (sin cambios)
+        // Confirmar pago - URL actualizada después del deploy Gen 2
         const response = await fetch(
           "https://us-central1-prototipo-mozo.cloudfunctions.net/confirmarPago",
           {
@@ -88,7 +88,7 @@ const OrderConfirmation = () => {
         const data = await response.json();
         setOrderId(data.orderId);
 
-        // Descontar stock (best-effort, sin cambios)
+        // Descontar stock (best-effort) - URL actualizada después del deploy Gen 2
         try {
           await fetch(
             "https://us-central1-prototipo-mozo.cloudfunctions.net/descontarStock",

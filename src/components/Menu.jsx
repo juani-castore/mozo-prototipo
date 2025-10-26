@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { CartContext } from "../CartContext";
+import logo from "../assets/logo.png";
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
@@ -185,7 +186,7 @@ const Menu = () => {
               {/* Logo */}
               <div className="flex-shrink-0">
                 <img 
-                  src="/assets/logo.png" 
+                  src={logo}
                   alt="Mozo Logo" 
                   className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-lg"
                 />

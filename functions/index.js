@@ -10,8 +10,8 @@ const db = admin.firestore();
 
 const MP_TOKEN = defineSecret("MP_TOKEN");
 
-const oldBaseUrl = "https://mozo-prototipo.vercel.app"; // Cambiar a tu dominio
-const baseUrl = "https://mozo.app"; // Cambiar a tu dominio
+const oldBaseUrl = "https://mozo-prototipo.vercel.app";
+const baseUrl = "https://mozo.top/fud"; // ✅ CORREGIDO: mozo.top en lugar de mozo.app
 
 // Configurar CORS
 
