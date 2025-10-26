@@ -1,7 +1,19 @@
 {
   "rewrites": [
-    { "source": "/fud/:path*", "destination": "/index.html" },
-    { "source": "/fud", "destination": "/index.html" }
+    { "source": "/fud", "destination": "/index.html" },
+    { "source": "/fud/", "destination": "/index.html" },
+    { "source": "/fud/:path*", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
   ]
 }
   
