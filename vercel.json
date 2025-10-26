@@ -1,21 +1,10 @@
 {
   "rewrites": [
-    { "source": "/fud", "destination": "/index.html" },
-    { "source": "/fud/", "destination": "/index.html" },
+    { "source": "/fud", "destination": "/fud/index.html" },
+    { "source": "/fud/", "destination": "/fud/index.html" },
     { 
-      "source": "/fud/(cart|checkout|order-confirmation|payment-failed|payment-pending|restaurante|restaurante/:path*)", 
-      "destination": "/index.html" 
-    }
-  ],
-  "headers": [
-    {
-      "source": "/fud/assets/:path*",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
+      "source": "/fud/:path*", 
+      "destination": "/fud/index.html" 
     }
   ]
 }
