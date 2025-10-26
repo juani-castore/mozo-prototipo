@@ -1,4 +1,8 @@
 {
+  "redirects": [
+    { "source": "/", "destination": "/fud", "permanent": false },
+    { "source": "/index.html", "destination": "/fud", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/fud", "destination": "/fud/index.html" },
     { "source": "/fud/", "destination": "/fud/index.html" },
