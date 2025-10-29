@@ -46,6 +46,9 @@ const Estadisticas = () => {
   const [margenesIndividuales, setMargenesIndividuales] = useState({});
   const [datosBase, setDatosBase] = useState({});
   const [editandoProducto, setEditandoProducto] = useState(null);
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaFin, setFechaFin] = useState('');
+  const [excluirFinesDeSemana, setExcluirFinesDeSemana] = useState(false);
 
   // Nuevo: estados para secciones plegables (agregamos graficos)
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({
@@ -174,6 +177,22 @@ const Estadisticas = () => {
     setRentabilidadProductos(rentabilidad);
   }, [datosBase, margenCostoGlobal, margenesIndividuales]);
 
+  // Inicializar fechas por defecto cuando cargan los totales por día
+  useEffect(() => {
+    const fechas = Object.keys(totalesPorDia).sort(); // ascendente
+    const hoy = new Date().toISOString().slice(0, 10);
+    if (fechas.length === 0) {
+      setFechaInicio(hoy);
+      setFechaFin(hoy);
+      return;
+    }
+
+    const primer = fechas[0];
+    // Por defecto inicio = primer día disponible, fin = hoy
+    setFechaInicio(primer);
+    setFechaFin(hoy);
+  }, [totalesPorDia]);
+
   // Mejoradas: funciones para manejar márgenes
   const handleMargenGlobalChange = (e) => {
     const valor = parseFloat(e.target.value);
@@ -263,33 +282,192 @@ const Estadisticas = () => {
     };
   };
 
-  // Gráfico de línea: Ventas por hora
-  const getGraficoVentasPorHora = () => {
-    const maxPedidosHora = Math.max(...Object.values(ventasPorHora).map(h => h.pedidos));
-    const horasOrdenadas = Object.entries(ventasPorHora)
-      .sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+  
+
+  // Gráfico de línea: Evolución de ventas a lo largo del tiempo (neto y cantidad)
+  const getGraficoEvolucionVentas = () => {
+    // totalesPorDia tiene la estructura { 'YYYY-MM-DD': { bruto, neto, pedidos } }
+    const filas = Object.entries(totalesPorDia);
+    // Filtrar por rango si hay valores
+    let filasFiltradas = filas;
+    if (fechaInicio || fechaFin) {
+      const start = fechaInicio || '0000-01-01';
+      const end = fechaFin || new Date().toISOString().slice(0, 10);
+      filasFiltradas = filas.filter(([fecha]) => fecha >= start && fecha <= end);
+    }
+
+    // Excluir fines de semana si la opción está activada
+    if (excluirFinesDeSemana) {
+      filasFiltradas = filasFiltradas.filter(([fecha]) => {
+        // Crear fecha sin zona horaria para evitar desplazamientos
+        const d = new Date(fecha + 'T00:00:00');
+        const day = d.getDay(); // 0 = Domingo, 6 = Sábado
+        return day !== 0 && day !== 6;
+      });
+    }
+
+    const filasOrdenadas = filasFiltradas.sort((a, b) => a[0].localeCompare(b[0])); // ascendente por fecha
+
+    const labels = filasOrdenadas.map(([fecha]) => fecha);
+    const pedidosSeries = filasOrdenadas.map(([, datos]) => datos.pedidos || 0);
+    const ventasNetasSeries = filasOrdenadas.map(([, datos]) => Number((datos.neto || 0).toFixed(2)));
 
     return {
-      labels: horasOrdenadas.map(([hora]) => `${hora}:00`),
+      labels,
       datasets: [
         {
-          label: 'Pedidos por Hora',
-          data: horasOrdenadas.map(([, datos]) => datos.pedidos),
-          borderColor: 'rgb(147, 51, 234)',
-          backgroundColor: 'rgba(147, 51, 234, 0.1)',
-          tension: 0.4,
+          label: 'Cantidad de pedidos',
+          data: pedidosSeries,
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.08)',
+          yAxisID: 'y',
+          tension: 0.2,
           fill: true,
         },
         {
-          label: 'Ventas por Hora ($)',
-          data: horasOrdenadas.map(([, datos]) => datos.total),
+          label: 'Ventas netas ($)',
+          data: ventasNetasSeries,
           borderColor: 'rgb(34, 197, 94)',
-          backgroundColor: 'rgba(34, 197, 94, 0.1)',
-          tension: 0.4,
+          backgroundColor: 'rgba(34, 197, 94, 0.08)',
           yAxisID: 'y1',
+          tension: 0.2,
+          fill: false,
         },
       ],
     };
+  };
+
+  const opcionesEvolucionVentas = {
+    responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Evolución de Ventas: Neto y Cantidad'
+      },
+      legend: {
+        position: 'top'
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+        title: { display: true, text: 'Fecha' }
+      },
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        title: { display: true, text: 'Cantidad de pedidos' }
+      },
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        title: { display: true, text: 'Ventas netas ($)' },
+        grid: { drawOnChartArea: false }
+      }
+    }
+  };
+
+  // Gráfico de línea: Evolución ACUMULADA de ventas (neto y cantidad)
+  const getGraficoEvolucionAcumulada = () => {
+    // Reutilizar la misma lógica de filtrado que en getGraficoEvolucionVentas
+    const filas = Object.entries(totalesPorDia);
+    let filasFiltradas = filas;
+    if (fechaInicio || fechaFin) {
+      const start = fechaInicio || '0000-01-01';
+      const end = fechaFin || new Date().toISOString().slice(0, 10);
+      filasFiltradas = filas.filter(([fecha]) => fecha >= start && fecha <= end);
+    }
+
+    if (excluirFinesDeSemana) {
+      filasFiltradas = filasFiltradas.filter(([fecha]) => {
+        const d = new Date(fecha + 'T00:00:00');
+        const day = d.getDay();
+        return day !== 0 && day !== 6;
+      });
+    }
+
+    const filasOrdenadas = filasFiltradas.sort((a, b) => a[0].localeCompare(b[0]));
+
+    const labels = filasOrdenadas.map(([fecha]) => fecha);
+    
+    // Calcular series acumuladas
+    let acumPedidos = 0;
+    let acumVentasNetas = 0;
+    const pedidosAcumulados = [];
+    const ventasNetasAcumuladas = [];
+
+    filasOrdenadas.forEach(([, datos]) => {
+      acumPedidos += datos.pedidos || 0;
+      acumVentasNetas += datos.neto || 0;
+      pedidosAcumulados.push(acumPedidos);
+      ventasNetasAcumuladas.push(Number(acumVentasNetas.toFixed(2)));
+    });
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Cantidad acumulada de pedidos',
+          data: pedidosAcumulados,
+          borderColor: 'rgb(139, 92, 246)',
+          backgroundColor: 'rgba(139, 92, 246, 0.08)',
+          yAxisID: 'y',
+          tension: 0.2,
+          fill: true,
+        },
+        {
+          label: 'Ventas netas acumuladas ($)',
+          data: ventasNetasAcumuladas,
+          borderColor: 'rgb(16, 185, 129)',
+          backgroundColor: 'rgba(16, 185, 129, 0.08)',
+          yAxisID: 'y1',
+          tension: 0.2,
+          fill: false,
+        },
+      ],
+    };
+  };
+
+  const opcionesEvolucionAcumulada = {
+    responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Evolución Acumulada: Neto y Cantidad'
+      },
+      legend: {
+        position: 'top'
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+        title: { display: true, text: 'Fecha' }
+      },
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        title: { display: true, text: 'Cantidad acumulada de pedidos' }
+      },
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        title: { display: true, text: 'Ventas netas acumuladas ($)' },
+        grid: { drawOnChartArea: false }
+      }
+    }
   };
 
   // Gráfico de dona: Top productos más vendidos
@@ -355,50 +533,7 @@ const Estadisticas = () => {
       },
     },
   };
-
-  const opcionesVentasHora = {
-    responsive: true,
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
-    scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: 'Hora del día'
-        }
-      },
-      y: {
-        type: 'linear',
-        display: true,
-        position: 'left',
-        title: {
-          display: true,
-          text: 'Número de Pedidos'
-        }
-      },
-      y1: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        title: {
-          display: true,
-          text: 'Ventas ($)'
-        },
-        grid: {
-          drawOnChartArea: false,
-        },
-      },
-    },
-    plugins: {
-      title: {
-        display: true,
-        text: 'Pedidos y Ventas por Hora'
-      }
-    }
-  };
+  
 
   const datosFiltrados = Object.entries(totalesPorDia)
     .filter(([fecha]) => fecha.includes(busqueda))
@@ -465,11 +600,68 @@ const Estadisticas = () => {
                   </div>
                 </div>
 
-                {/* Gráfico: Ventas por hora (ocupa 2 columnas) */}
+                {/* Gráfico: Evolución de ventas (neto y cantidad) - ocupa 2 columnas */}
                 <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow border">
-                  <h4 className="text-lg font-semibold mb-3 text-center">Distribución de Pedidos y Ventas por Hora</h4>
+                  <h4 className="text-lg font-semibold mb-3 text-center">Evolución de Ventas (Neto y Cantidad)</h4>
+                  <div className="mb-3 flex flex-col md:flex-row items-center justify-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-600">Inicio:</label>
+                      <input
+                        type="date"
+                        value={fechaInicio}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          // Si la nueva fecha inicio es posterior a la fecha fin, ajustamos fin
+                          if (fechaFin && val > fechaFin) {
+                            setFechaFin(val);
+                          }
+                          setFechaInicio(val);
+                        }}
+                        className="px-2 py-1 border rounded"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-600">Fin:</label>
+                      <input
+                        type="date"
+                        value={fechaFin}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          // Si la nueva fecha fin es anterior a la fecha inicio, ajustamos inicio
+                          if (fechaInicio && val < fechaInicio) {
+                            setFechaInicio(val);
+                          }
+                          setFechaFin(val);
+                        }}
+                        className="px-2 py-1 border rounded"
+                      />
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 text-sm text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={excluirFinesDeSemana}
+                          onChange={(e) => setExcluirFinesDeSemana(e.target.checked)}
+                          className="w-4 h-4"
+                        />
+                        Excluir sábados y domingos
+                      </label>
+                      <div className="text-sm text-gray-500">(Fin por defecto: hoy, Inicio por defecto: primer día disponible)</div>
+                    </div>
+                  </div>
                   <div className="h-80">
-                    <Line data={getGraficoVentasPorHora()} options={opcionesVentasHora} />
+                    <Line data={getGraficoEvolucionVentas()} options={opcionesEvolucionVentas} />
+                  </div>
+                </div>
+
+                {/* Gráfico: Evolución ACUMULADA de ventas (neto y cantidad) - ocupa 2 columnas */}
+                <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow border">
+                  <h4 className="text-lg font-semibold mb-3 text-center">Evolución Acumulada de Ventas (Neto y Cantidad)</h4>
+                  <div className="text-sm text-gray-500 text-center mb-2">
+                    (Este gráfico usa los mismos filtros de fecha y fines de semana del gráfico anterior)
+                  </div>
+                  <div className="h-80">
+                    <Line data={getGraficoEvolucionAcumulada()} options={opcionesEvolucionAcumulada} />
                   </div>
                 </div>
 
