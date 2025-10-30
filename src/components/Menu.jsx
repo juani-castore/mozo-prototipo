@@ -58,140 +58,135 @@ const Menu = () => {
 
   const renderProductCard = (product, isRecommended = false) => {
     const isOutOfStock = product.stock <= 0;
-    const baseStyle = isRecommended
-      ? "border-2 border-gold bg-gradient-to-br from-white to-gold/5 shadow-xl"
-      : "border-2 border-gray-200 bg-white shadow-lg hover:shadow-xl";
-    const bgStyle = isOutOfStock
-      ? "opacity-60 grayscale"
-      : "";
 
     return (
       <div
         key={product.id}
-        className={`relative rounded-2xl flex flex-col overflow-hidden
-            transition-all duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:scale-[1.02] 
-            ${baseStyle} ${bgStyle} group`}
+        className={`relative group animate-scale-in
+            ${isOutOfStock ? 'opacity-60' : ''}`}
       >
-        {/* Header con precio destacado */}
-        <div className={`p-4 pb-2 ${isRecommended ? 'bg-gradient-to-r from-gold/10 to-gold/5' : 'bg-gray-50'}`}>
-          <div className="flex justify-between items-start mb-2">
-            <div className="flex-1">
-              <h3 className="text-lg font-black text-brick tracking-tight leading-tight mb-1">
-                {product.name}
-              </h3>
-              {isRecommended && (
-                <div className="inline-flex items-center bg-gold text-brick text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                  ⭐ Recomendado
-                </div>
-              )}
+        {/* Card con diseño profesional */}
+        <div className={`relative overflow-hidden rounded-2xl bg-white shadow-md
+            transition-all duration-300 hover:shadow-xl hover:-translate-y-2
+            ${isRecommended ? 'ring-2 ring-pickap-primary' : 'border border-gray-200'}`}
+        >
+          
+          {/* Badge de recomendado - limpio */}
+          {isRecommended && (
+            <div className="absolute top-3 right-3 bg-pickap-primary text-white px-3 py-1.5 
+                text-xs font-bold rounded-lg shadow-md z-10">
+              ⭐ DESTACADO
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-black text-brick mb-1">
-                ${product.price}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Estado de stock */}
-        {isOutOfStock && (
-          <div className="absolute top-3 right-3 bg-red-600 text-white text-xs tracking-wide
-                font-bold px-3 py-1.5 rounded-full shadow-lg z-10 border-2 border-red-700">
-            AGOTADO
-          </div>
-        )}
-
-        {/* Contenido principal */}
-        <div className="p-4 pt-2 flex-1 flex flex-col">
-          {/* Descripción expandible */}
-          {product.description && (
-            <div className="mb-4">
-              <button
-                className="text-sm font-semibold transition-colors duration-200 text-brick hover:text-brick-light
-                  hover:underline flex items-center gap-1"
-                onClick={() => toggleExpand(product.id)}
-              >
-                {expanded[product.id] ? (
-                  <>
-                    <span>Ver menos</span>
-                    <svg className="w-3 h-3 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
-                    </svg>
-                  </>
-                ) : (
-                  <>
-                    <span>Ver descripción</span>
-                    <svg className="w-3 h-3 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </>
-                )}
-              </button>
-              {expanded[product.id] && (
-                <div className="mt-3 p-3 bg-gray-50 border-2 border-gray-200 rounded-xl">
-                  <p className="text-sm text-gray-700 leading-relaxed">{product.description}</p>
-                </div>
-              )}
+          )}
+          
+          {/* Badge de agotado */}
+          {isOutOfStock && (
+            <div className="absolute top-3 left-3 bg-pickap-dark text-white px-4 py-2 
+                text-sm font-bold rounded-lg shadow-md z-10">
+              AGOTADO
             </div>
           )}
 
-          {/* Botón de agregar al carrito */}
-          <div className="mt-auto">
+          {/* Contenido del producto */}
+          <div className="p-6 space-y-4">
+            {/* Header con nombre y precio */}
+            <div className="space-y-3">
+              <h3 className="text-xl font-black text-pickap-dark leading-tight 
+                  group-hover:text-pickap-primary transition-colors">
+                {product.name}
+              </h3>
+              
+              {/* Precio con diseño limpio */}
+              <div className="flex items-center justify-between">
+                <div className="bg-pickap-secondary text-white px-5 py-2 rounded-xl shadow-sm">
+                  <span className="text-xl font-black">${product.price}</span>
+                </div>
+                
+                {/* Stock indicator */}
+                {!isOutOfStock && product.stock < 10 && (
+                  <div className="flex items-center gap-2 bg-pickap-accent/10 text-pickap-accent 
+                      px-3 py-1 rounded-lg text-xs font-bold">
+                    <span className="w-2 h-2 bg-pickap-accent rounded-full"></span>
+                    Solo {product.stock}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Descripción expandible */}
+            {product.description && (
+              <div className="space-y-2">
+                <button
+                  onClick={() => toggleExpand(product.id)}
+                  className="flex items-center gap-2 text-pickap-secondary hover:text-pickap-primary 
+                      font-bold text-sm transition-colors"
+                >
+                  <span>{expanded[product.id] ? '👁️ Ocultar' : '👁️ Ver más'}</span>
+                  <svg 
+                    className={`w-4 h-4 transition-transform duration-300 
+                        ${expanded[product.id] ? 'rotate-180' : ''}`} 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                
+                {expanded[product.id] && (
+                  <div className="bg-pickap-light p-4 rounded-xl border border-pickap-secondary/20 animate-slide-up">
+                    <p className="text-pickap-dark/80 leading-relaxed text-sm">{product.description}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Botón de agregar - limpio y llamativo */}
             <button
               onClick={() => handleAddToCart(product)}
               disabled={isOutOfStock}
-              className={`font-extrabold px-4 py-3 rounded-xl transition-all duration-200 w-full text-sm
-                         transform motion-safe:active:scale-95 shadow-lg hover:shadow-xl tracking-tight ${
-                isOutOfStock
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-brick text-white hover:bg-brick-light motion-safe:hover:-translate-y-0.5"
-              }`}
+              className={`w-full py-4 rounded-xl font-bold text-base
+                  transition-all duration-300 transform
+                  ${isOutOfStock 
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                    : 'bg-pickap-primary text-white hover:bg-pickap-primary/90 hover:scale-105 shadow-md hover:shadow-lg'
+                  }`}
             >
-              {isOutOfStock ? (
-                <div className="flex items-center justify-center gap-2">
-                  <span>Agotado</span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-2">
-                  <span>Agregar al carrito</span>
-                </div>
-              )}
+              <span className="flex items-center justify-center gap-2">
+                {isOutOfStock ? '😔 AGOTADO' : '🛒 AGREGAR AL CARRITO'}
+              </span>
             </button>
           </div>
         </div>
-
-        {/* Efecto de brillo en hover para recomendados */}
-        {isRecommended && !isOutOfStock && (
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/5 to-transparent 
-                         opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-        )}
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-5 py-8
+    <div className="flex flex-col items-center justify-center min-h-screen bg-pickap-light px-5 py-8
                 pb-28 sm:pb-12 [padding-bottom:env(safe-area-inset-bottom)]">
 
-      {/* Header mejorado */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-black text-brick mb-2 tracking-tight">
-          FUD TIME
-        </h1>
-        <h2 className="text-3xl md:text-4xl font-bold text-brick mb-2 tracking-wide">
-          Menú
-        </h2>
-        <div className="w-24 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-4" />
-        <p className="text-gray-600 font-medium max-w-md mx-auto leading-relaxed">
-          Descubre nuestros deliciosos productos preparados con los mejores ingredientes
+      {/* Header con diseño limpio y profesional */}
+      <div className="text-center mb-12 animate-slide-up">
+        <div className="relative inline-block mb-6">
+          <h1 className="relative text-5xl md:text-7xl font-black text-pickap-dark">
+            FUD TIME
+          </h1>
+          <div className="absolute -bottom-2 left-0 right-0 h-1 bg-pickap-primary rounded-full"></div>
+        </div>
+        
+        <p className="text-pickap-dark/70 font-bold text-lg md:text-xl flex items-center justify-center gap-2">
+          <span className="text-2xl">🍔</span>
+          Pedí · Pagá · Retirá
+          <span className="text-2xl">🎉</span>
         </p>
       </div>
 
-      {/* Botones fijos - Copiados exactamente de Cart */}
+      {/* Botones fijos con diseño más sutil */}
       <button
-        className="fixed bottom-4 left-4 z-40 bg-white/60 backdrop-blur
-             border-2 border-green-600 text-green-700 font-semibold rounded-full 
-             hover:bg-green-50 hover:border-green-700 shadow-sm transition-all
+        className="fixed bottom-4 left-4 z-40 bg-white
+             border-2 border-pickap-accent text-pickap-accent font-bold rounded-full 
+             hover:bg-pickap-accent hover:text-white shadow-md hover:shadow-lg 
+             transition-all hover:scale-105
              px-6 py-3 text-base min-[480px]:px-5 min-[480px]:py-2.5 min-[480px]:text-sm 
              min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm
              min-[360px]:px-3 min-[360px]:py-2 min-[360px]:text-xs"
@@ -205,56 +200,71 @@ const Menu = () => {
 
       <button
         onClick={() => navigate("/fud/cart")}
-        className="fixed bottom-4 right-4 z-50 bg-gold text-brick font-extrabold rounded-xl 
-             shadow-xl ring-2 ring-yellow-300/40 hover:shadow-2xl motion-safe:hover:-translate-y-0.5 
-             transition-all tracking-tight
+        className="fixed bottom-4 right-4 z-50 
+             bg-pickap-primary hover:bg-pickap-primary/90
+             text-white font-black rounded-2xl 
+             shadow-md hover:shadow-xl transition-all hover:scale-105
              px-6 py-3 text-base min-[480px]:px-5 min-[480px]:py-2.5 min-[480px]:text-sm 
              min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm
              min-[360px]:px-3 min-[360px]:py-2 min-[360px]:text-xs"
       >
-        <span className="min-[520px]:hidden">Carrito</span>
-        <span className="hidden min-[520px]:inline">Ir al Carrito</span>
+        <span className="flex items-center gap-2">
+          <span>🛒</span>
+          <span className="min-[520px]:hidden">Carrito</span>
+          <span className="hidden min-[520px]:inline">Ir al Carrito</span>
+        </span>
       </button>
 
-      {/* Sección de recomendados mejorada */}
+      {/* Sección de recomendados con diseño limpio */}
       {recommendedProducts.length > 0 && (
-        <div className="mb-16 w-full max-w-7xl">
-          <div className="text-center mb-8">
-            <h3 className="text-3xl font-black text-brick mb-2 tracking-tight">
-              ⭐ Productos Recomendados
+        <div className="mb-16 w-full max-w-7xl animate-slide-up">
+          {/* Header de sección profesional */}
+          <div className="relative text-center mb-10">
+            <h3 className="relative text-4xl font-black mb-3 flex items-center justify-center gap-3 text-pickap-dark">
+              <span className="text-4xl">⭐</span>
+              <span>Top Picks</span>
+              <span className="text-4xl">⭐</span>
             </h3>
-            <p className="text-gray-600 font-semibold">Los favoritos de nuestros clientes</p>
+            <p className="text-pickap-dark/70 font-medium">Los favoritos de nuestros clientes</p>
+            <div className="w-24 h-1 bg-pickap-primary mx-auto mt-3 rounded-full"></div>
           </div>
-          <div className="h-1 bg-gradient-to-r from-transparent via-gold to-transparent w-full max-w-md mx-auto mb-8" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          
+          {/* Grid de productos recomendados */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recommendedProducts.map((product) => renderProductCard(product, true))}
           </div>
         </div>
       )}
 
-      {/* Secciones de categorías mejoradas */}
-      {Object.keys(groupedProducts).map((category) => (
-        <div key={category} className="mb-16 w-full max-w-6xl">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-black text-brick mb-2 tracking-tight">
-              {category}
-            </h3>
-            <div className="w-16 h-1 bg-gold mx-auto" />
+      {/* Secciones de categorías con diseño limpio y profesional */}
+      {Object.keys(groupedProducts).map((category, idx) => (
+        <div key={category} className="mb-16 w-full max-w-7xl animate-slide-up"
+            style={{animationDelay: `${idx * 100}ms`}}>
+          
+          {/* Header de categoría con diseño elegante */}
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-md border-l-4 border-pickap-secondary">
+              <h3 className="text-3xl font-black text-pickap-dark">
+                {category}
+              </h3>
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          
+          {/* Grid de productos con diseño responsivo */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {groupedProducts[category].map((product) => renderProductCard(product))}
           </div>
         </div>
       ))}
 
-      {/* Notificación mejorada */}
+      {/* Notificación con diseño limpio */}
       {notification && (
         <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50
-                  bg-green-600 backdrop-blur text-white px-6 py-3
-                  rounded-full shadow-xl border-2 border-green-700
-                  flex items-center gap-2 font-extrabold tracking-tight
-                  motion-safe:animate-bounce">
-          <span>✅</span>
+                  bg-pickap-accent text-white 
+                  px-8 py-4 rounded-2xl shadow-xl
+                  flex items-center gap-3 font-bold
+                  animate-slide-up border-2 border-white/50">
+          <span className="text-2xl">✅</span>
           <span>{notification}</span>
         </div>
       )}
