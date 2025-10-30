@@ -96,14 +96,12 @@ const Checkout = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-5 py-8 pb-28 sm:pb-12 [padding-bottom:env(safe-area-inset-bottom)]">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-pickap-gray px-5 py-8 pb-28 sm:pb-12 [padding-bottom:env(safe-area-inset-bottom)]">
       
-      {/* Header unificado */}
+      {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-black text-brick mb-2 tracking-tight">MOZO</h1>
-        <h2 className="text-3xl md:text-4xl font-black text-brick mb-4 tracking-tight">Checkout</h2>
-        <div className="w-24 h-1 bg-gradient-to-r from-gold/10 via-gold to-gold/10 mx-auto mb-4" />
-        <p className="text-gray-600 font-semibold max-w-md mx-auto leading-relaxed">
+        <h1 className="text-4xl md:text-5xl font-black text-pickap-black mb-2 tracking-tight">CHECKOUT</h1>
+        <p className="text-pickap-gray-dark font-medium max-w-md mx-auto">
           Completa tus datos para finalizar el pedido
         </p>
       </div>
@@ -111,25 +109,25 @@ const Checkout = () => {
       <div className="w-full max-w-4xl space-y-6">
         
         {/* Resumen del pedido */}
-        <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200">
-          <div className="bg-gold text-brick px-6 py-4 rounded-t-xl">
-            <h3 className="font-black text-lg tracking-tight">Resumen de tu pedido</h3>
+        <div className="bg-white rounded-2xl shadow-sm">
+          <div className="bg-pickap-yellow text-pickap-black px-6 py-4 rounded-t-2xl">
+            <h3 className="font-bold text-lg">Resumen de tu pedido</h3>
           </div>
           <div className="p-6">
             <div className="space-y-3">
               {cart.map((item) => (
-                <div key={item.id} className="flex justify-between items-center py-2 border-b-2 border-gray-100 last:border-b-0">
+                <div key={item.id} className="flex justify-between items-center py-2 border-b border-pickap-gray last:border-b-0">
                   <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 bg-gold text-brick rounded-xl flex items-center justify-center text-xs font-black shadow-sm border-2 border-gold">
+                    <div className="w-6 h-6 bg-pickap-yellow text-pickap-black rounded-xl flex items-center justify-center text-xs font-bold">
                       {item.quantity}
                     </div>
-                    <span className="font-black text-brick">{item.name}</span>
+                    <span className="font-bold text-pickap-black">{item.name}</span>
                   </div>
-                  <span className="font-black text-brick">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-bold text-pickap-black">${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
-              <div className="h-px bg-gradient-to-r from-gold/10 via-gold to-gold/10 w-full my-4" />
-              <div className="flex justify-between items-center text-xl font-black text-brick">
+              <div className="h-px bg-pickap-gray-dark/20 w-full my-4" />
+              <div className="flex justify-between items-center text-xl font-bold text-pickap-black">
                 <span>Total</span>
                 <span>${calculateTotal().toFixed(2)}</span>
               </div>
@@ -138,16 +136,16 @@ const Checkout = () => {
         </div>
 
         {/* Formulario de datos */}
-        <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200">
-          <div className="bg-brick text-white px-6 py-4 rounded-t-xl">
-            <h3 className="font-black text-lg tracking-tight">Datos del cliente</h3>
+        <div className="bg-white rounded-2xl shadow-sm">
+          <div className="bg-pickap-black text-white px-6 py-4 rounded-t-2xl">
+            <h3 className="font-bold text-lg">Datos del cliente</h3>
           </div>
           
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             
             {/* Nombre completo */}
             <div>
-              <label className="block text-sm font-black mb-3 text-brick tracking-wide">
+              <label className="block text-sm font-bold mb-3 text-pickap-black">
                 Nombre completo *
               </label>
               <input
@@ -156,14 +154,14 @@ const Checkout = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-brick focus:ring-2 focus:ring-brick/20 transition-all duration-200 font-semibold shadow-sm"
+                className="w-full px-4 py-3 border border-pickap-gray-dark/30 rounded-xl focus:outline-none focus:border-pickap-yellow focus:ring-2 focus:ring-pickap-yellow/20 transition-all duration-200 font-medium"
                 placeholder="Ingresa tu nombre completo"
               />
             </div>
 
             {/* Correo electrónico */}
             <div>
-              <label className="block text-sm font-black mb-3 text-brick tracking-wide">
+              <label className="block text-sm font-bold mb-3 text-pickap-black">
                 Correo electrónico *
               </label>
               <input
@@ -172,23 +170,23 @@ const Checkout = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-brick focus:ring-2 focus:ring-brick/20 transition-all duration-200 font-semibold shadow-sm"
+                className="w-full px-4 py-3 border border-pickap-gray-dark/30 rounded-xl focus:outline-none focus:border-pickap-yellow focus:ring-2 focus:ring-pickap-yellow/20 transition-all duration-200 font-medium"
                 placeholder="ejemplo@correo.com"
               />
             </div>
 
             {/* Hora de retiro con interruptor */}
             <div>
-              <label className="block text-sm font-black mb-3 text-brick tracking-wide">
+              <label className="block text-sm font-bold mb-3 text-pickap-black">
                 Hora de retiro
               </label>
               
-              {/* Interruptor Toggle - Ancho completo y más estético */}
+              {/* Interruptor Toggle */}
               <div className="mb-4">
-                <div className="relative flex items-center bg-gray-100 rounded-2xl p-2 border-2 border-gray-200 shadow-sm w-full">
+                <div className="relative flex items-center bg-pickap-gray rounded-2xl p-2 w-full">
                   {/* Background del toggle */}
                   <div 
-                    className={`absolute top-2 bottom-2 w-1/2 bg-white rounded-xl shadow-lg transition-all duration-300 ease-in-out border-2 border-gold ${
+                    className={`absolute top-2 bottom-2 w-1/2 bg-white rounded-xl shadow-sm transition-all duration-300 ease-in-out ${
                       retirarAhora ? 'left-2' : 'left-1/2 ml-0'
                     }`}
                   />
@@ -197,10 +195,10 @@ const Checkout = () => {
                   <button
                     type="button"
                     onClick={handleToggleRetirarAhora}
-                    className={`relative z-10 py-4 text-base font-black rounded-xl transition-all duration-200 flex-1 ${
+                    className={`relative z-10 py-4 text-base font-bold rounded-xl transition-all duration-200 flex-1 ${
                       retirarAhora
-                        ? 'text-brick'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'text-pickap-black'
+                        : 'text-pickap-gray-dark hover:text-pickap-black'
                     }`}
                   >
                     Retirar ya
@@ -210,10 +208,10 @@ const Checkout = () => {
                   <button
                     type="button"
                     onClick={handleToggleRetirarAhora}
-                    className={`relative z-10 py-4 text-base font-black rounded-xl transition-all duration-200 flex-1 ${
+                    className={`relative z-10 py-4 text-base font-bold rounded-xl transition-all duration-200 flex-1 ${
                       !retirarAhora
-                        ? 'text-brick'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'text-pickap-black'
+                        : 'text-pickap-gray-dark hover:text-pickap-black'
                     }`}
                   >
                     Programar
@@ -225,18 +223,18 @@ const Checkout = () => {
               <div className="mt-4">
                 {retirarAhora ? (
                   /* Modo "Retirar ya" */
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-6 shadow-sm">
+                  <div className="bg-pickap-green/10 border border-pickap-green rounded-2xl p-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg border-2 border-green-600">
+                      <div className="w-12 h-12 bg-pickap-green rounded-full flex items-center justify-center">
                         <div className="w-3 h-3 bg-white rounded-full"></div>
                       </div>
                       <div className="flex-1">
-                        <p className="font-black text-green-800 text-lg tracking-tight">Retiro inmediato configurado</p>
-                        <p className="text-green-700 font-semibold">
+                        <p className="font-bold text-pickap-black text-lg">Retiro inmediato configurado</p>
+                        <p className="text-pickap-gray-dark font-medium">
                           Tu pedido estará listo para retirar en los próximos minutos
                         </p>
                         {formData.pickupTime && (
-                          <p className="text-green-600 font-black text-sm mt-2 bg-green-100 px-3 py-1 rounded-full inline-block border-2 border-green-200">
+                          <p className="text-pickap-green font-bold text-sm mt-2 bg-white px-3 py-1 rounded-full inline-block">
                             Hora registrada: {formData.pickupTime}
                           </p>
                         )}
@@ -252,18 +250,18 @@ const Checkout = () => {
                       value={formData.pickupTime}
                       onChange={handleTimeChange}
                       required={!retirarAhora}
-                      className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-brick focus:ring-2 focus:ring-brick/20 transition-all duration-200 font-black text-lg text-center bg-white shadow-sm"
+                      className="w-full px-6 py-4 border border-pickap-gray-dark/30 rounded-2xl focus:outline-none focus:border-pickap-yellow focus:ring-2 focus:ring-pickap-yellow/20 transition-all duration-200 font-bold text-lg text-center bg-white"
                     />
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-2xl p-6 shadow-sm">
+                    <div className="bg-pickap-yellow/10 border border-pickap-yellow rounded-2xl p-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg border-2 border-blue-600">
-                          <div className="w-6 h-6 border-2 border-white rounded-sm"></div>
+                        <div className="w-12 h-12 bg-pickap-yellow rounded-full flex items-center justify-center">
+                          <div className="w-6 h-6 border-2 border-pickap-black rounded-sm"></div>
                         </div>
                         <div>
-                          <p className="text-blue-800 font-black text-lg tracking-tight">
+                          <p className="text-pickap-black font-bold text-lg">
                             Selecciona tu hora preferida
                           </p>
-                          <p className="text-blue-700 font-semibold">
+                          <p className="text-pickap-gray-dark font-medium">
                             Elige cuándo quieres retirar tu pedido
                           </p>
                         </div>
@@ -276,7 +274,7 @@ const Checkout = () => {
 
             {/* Comentarios */}
             <div>
-              <label className="block text-sm font-black mb-3 text-brick tracking-wide">
+              <label className="block text-sm font-bold mb-3 text-pickap-black">
                 Comentarios adicionales
               </label>
               <textarea
@@ -285,7 +283,7 @@ const Checkout = () => {
                 onChange={handleChange}
                 rows="4"
                 placeholder="¿Hay algo más que deberíamos saber sobre tu pedido? (Opcional)"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-brick focus:ring-2 focus:ring-brick/20 transition-all duration-200 font-semibold resize-none shadow-sm"
+                className="w-full px-4 py-3 border border-pickap-gray-dark/30 rounded-xl focus:outline-none focus:border-pickap-yellow focus:ring-2 focus:ring-pickap-yellow/20 transition-all duration-200 font-medium resize-none"
               />
             </div>
 
@@ -293,15 +291,15 @@ const Checkout = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-4 px-6 rounded-xl font-black text-lg tracking-tight transition-all duration-200 shadow-xl ${
+              className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 shadow-sm ${
                 isLoading
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-brick text-white hover:bg-brick-light hover:shadow-2xl motion-safe:hover:-translate-y-0.5 border-2 border-brick'
+                  ? 'bg-pickap-gray text-pickap-gray-dark cursor-not-allowed'
+                  : 'bg-pickap-yellow text-pickap-black hover:bg-pickap-yellow/90 hover:shadow hover:-translate-y-0.5'
               }`}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-pickap-black"></div>
                   <span>Procesando...</span>
                 </div>
               ) : (
@@ -316,7 +314,7 @@ const Checkout = () => {
 
         {/* Botones de navegación */}
         <div className="flex justify-center">
-          <Link to="/cart" className="inline-flex items-center text-brick hover:text-brick-light font-black transition-colors duration-200 tracking-wide">
+          <Link to="/fud/cart" className="inline-flex items-center text-pickap-black hover:text-pickap-gray-dark font-medium transition-colors duration-200">
             <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0L3.586 12l2.707-2.707a1 1 0 011.414 1.414L6.414 12l1.293 1.293a1 1 0 010 1.414z" clipRule="evenodd" />
               <path fillRule="evenodd" d="M3 12a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
@@ -326,11 +324,11 @@ const Checkout = () => {
         </div>
       </div>
 
-      {/* Botones fijos - Copiados exactamente de Cart */}
+      {/* Botones fijos */}
       <button
-        className="fixed bottom-4 left-4 z-40 bg-white/60 backdrop-blur
-             border-2 border-green-600 text-green-700 font-semibold rounded-full 
-             hover:bg-green-50 hover:border-green-700 shadow-sm transition-all
+        className="fixed bottom-4 left-4 z-40 bg-white
+             border border-pickap-green text-pickap-green font-semibold rounded-full 
+             hover:bg-pickap-green hover:text-white shadow-sm transition-all
              px-6 py-3 text-base min-[480px]:px-5 min-[480px]:py-2.5 min-[480px]:text-sm 
              min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm
              min-[360px]:px-3 min-[360px]:py-2 min-[360px]:text-xs"
@@ -344,9 +342,8 @@ const Checkout = () => {
 
       <button
         onClick={() => navigate('/fud/menu')}
-        className="fixed bottom-4 right-4 z-50 bg-gold text-brick font-extrabold rounded-xl 
-             shadow-xl ring-2 ring-yellow-300/40 hover:shadow-2xl motion-safe:hover:-translate-y-0.5 
-             transition-all tracking-tight
+        className="fixed bottom-4 right-4 z-50 bg-pickap-yellow text-pickap-black font-bold rounded-xl 
+             shadow-sm hover:shadow transition-all hover:-translate-y-0.5
              px-6 py-3 text-base min-[480px]:px-5 min-[480px]:py-2.5 min-[480px]:text-sm 
              min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm
              min-[360px]:px-3 min-[360px]:py-2 min-[360px]:text-xs"
