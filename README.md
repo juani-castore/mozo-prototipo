@@ -1,11 +1,11 @@
-# Proyecto de MOZO para FUD en UTDT
+# Proyecto de PICKUP para FUD en UTDT
 
 
-# 🧾 MOZO - README PARA DESARROLLADORES
+# 🧾 PICKUP - README PARA DESARROLLADORES
 
 ## 📦 Descripción General
 
-**Mozo** es una app para que los clientes de un restaurante pidan comida y paguen online. El restaurante ve los pedidos en tiempo real y los imprime automáticamente en cocina.
+**Pickup** es una app para que los clientes de un restaurante pidan comida y paguen online. El restaurante ve los pedidos en tiempo real y los imprime automáticamente en cocina.
 
 ---
 

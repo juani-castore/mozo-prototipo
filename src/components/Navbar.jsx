@@ -11,7 +11,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Logo Mozo" className="h-9 md:h-10 drop-shadow-lg" />
+            <img src={logo} alt="Logo Pickup" className="h-9 md:h-10 drop-shadow-lg" />
           </Link>
 
           {/* Botón hamburguesa (mobile) */}
@@ -58,7 +58,7 @@ const Navbar = () => {
               rel="noopener noreferrer"
               className="px-4 py-2 text-sm font-black text-brick bg-gold hover:bg-white hover:text-brick rounded-xl shadow-lg hover:shadow-xl transition-all tracking-tight border-2 border-gold"
             >
-              MOZO
+              PICKUP
             </a>
           </div>
         </div>
@@ -98,7 +98,7 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
               className="w-full px-4 py-2 text-sm font-black text-brick bg-gold hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all tracking-tight border-2 border-gold"
             >
-              MOZO
+              PICKUP
             </a>
           </div>
         </div>

@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { CartContext } from "../CartContext";
-import logo from "../assets/logo.png";
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
@@ -173,54 +172,6 @@ const Menu = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-5 py-8
                 pb-28 sm:pb-12 [padding-bottom:env(safe-area-inset-bottom)]">
-      
-      {/* Banner de evolución - Destacado */}
-      <div className="w-full max-w-4xl mb-8 px-3 sm:px-5">
-        <div className="bg-gradient-to-r from-brick via-brick-light to-brick rounded-2xl shadow-2xl overflow-hidden border-2 border-gold/30">
-          <div className="relative px-6 py-6 sm:px-8 sm:py-8">
-            {/* Decoración de fondo */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-gold/10 rounded-full blur-3xl"></div>
-            
-            <div className="relative flex flex-col sm:flex-row items-center gap-6">
-              {/* Logo */}
-              <div className="flex-shrink-0">
-                <img 
-                  src={logo}
-                  alt="Mozo Logo" 
-                  className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-lg"
-                />
-              </div>
-              
-              {/* Contenido */}
-              <div className="flex-1 text-center sm:text-left">
-                <h3 className="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight flex items-center justify-center sm:justify-start gap-2">
-                  <span className="text-gold text-3xl">✨</span>
-                  Mozo está evolucionando
-                </h3>
-                <p className="text-white/90 font-medium leading-relaxed mb-4 text-sm sm:text-base">
-                  Estamos atravesando una etapa de transformación con una nueva identidad y mejoras en camino.
-                </p>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-                  <p className="text-white font-semibold text-sm sm:text-base mb-2">
-                    <span className="text-gold">✓</span> El sistema sigue funcionando con total normalidad
-                  </p>
-                  <p className="text-white/80 text-xs sm:text-sm">
-                    <span className="font-semibold">Soporte:</span>{' '}
-                    <a 
-                      href="mailto:themozoai@gmail.com" 
-                      className="text-gold hover:text-yellow-300 underline font-semibold transition-colors"
-                    >
-                      themozoai@gmail.com
-                    </a>
-                    {' '}o usa el botón &quot;Hablar con MOZO&quot;
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Header mejorado */}
       <div className="text-center mb-8">
@@ -245,11 +196,11 @@ const Menu = () => {
              min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm
              min-[360px]:px-3 min-[360px]:py-2 min-[360px]:text-xs"
         onClick={() => 
-          window.open('https://wa.me/5492645271386?text=Hola%2C%20quiero%20hablar%20con%20MOZO', '_blank')
+          window.open('https://wa.me/5492645271386?text=Hola%2C%20quiero%20hablar%20con%20PICKUP', '_blank')
         }
       >
-        <span className="min-[480px]:hidden">MOZO</span>
-        <span className="hidden min-[480px]:inline">Hablar con MOZO</span>
+        <span className="min-[480px]:hidden">PICKUP</span>
+        <span className="hidden min-[480px]:inline">Hablar con PICKUP</span>
       </button>
 
       <button

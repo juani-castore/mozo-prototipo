@@ -7,7 +7,7 @@ const RestauranteDashboard = () => {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-black text-brick mb-2 tracking-tight">MOZO</h1>
+        <h1 className="text-4xl md:text-5xl font-black text-brick mb-2 tracking-tight">PICKUP</h1>
         <h2 className="text-3xl md:text-4xl font-black text-brick mb-4 tracking-tight">Panel de Administración</h2>
         <div className="w-24 h-1 bg-gradient-to-r from-gold/10 via-gold to-gold/10 mx-auto" />
       </div>

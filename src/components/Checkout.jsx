@@ -335,11 +335,11 @@ const Checkout = () => {
              min-[400px]:px-4 min-[400px]:py-2 min-[400px]:text-sm
              min-[360px]:px-3 min-[360px]:py-2 min-[360px]:text-xs"
         onClick={() => 
-          window.open('https://wa.me/5492645271386?text=Hola%2C%20quiero%20hablar%20con%20MOZO', '_blank')
+          window.open('https://wa.me/5492645271386?text=Hola%2C%20quiero%20hablar%20con%20PICKUP', '_blank')
         }
       >
-        <span className="min-[480px]:hidden">MOZO</span>
-        <span className="hidden min-[480px]:inline">Hablar con MOZO</span>
+        <span className="min-[480px]:hidden">PICKUP</span>
+        <span className="hidden min-[480px]:inline">Hablar con PICKUP</span>
       </button>
 
       <button
