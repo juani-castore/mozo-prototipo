@@ -13,6 +13,7 @@ import MenuDashboard from "./components/MenuDashboard"; // Nuevo componente para
 import PaymentFailed from "./components/PaymentFailed";
 import PaymentPending from "./components/PaymentPending";
 import Estadisticas from "./components/Estadisticas"; // Componente para estadísticas
+import Welcome from "./components/Welcome"; // Nueva página de bienvenida
 
 function App() {
   const [cart, setCart] = useState(() => {
@@ -25,20 +26,23 @@ function App() {
   }, [cart]);
 
   return (
-    <Router basename="/fud">
-      <Navbar />
+    <Router>
       <Routes>
-        <Route path="/" element={<Menu cart={cart} setCart={setCart} />} />
-        <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} />
-        <Route path="/checkout" element={<Checkout cart={cart} />} />
-        <Route path="/order-confirmation" element={<OrderConfirmation />} />
-        <Route path="/payment-failed" element={<PaymentFailed />} />
-        <Route path="/payment-pending" element={<PaymentPending />} />
-        <Route path="/restaurante" element={<RestauranteLogin />} />
-        <Route path="/restaurante/dashboard" element={<RestauranteDashboard />} />
-        <Route path="/restaurante/pedidos" element={<Pedidos />} />
-        <Route path="/restaurante/menu" element={<MenuDashboard />} />
-        <Route path="/restaurante/estadisticas" element={<Estadisticas />} />
+        {/* Ruta principal - Selección de restaurantes (sin Navbar) */}
+        <Route path="/" element={<Welcome />} />
+        
+        {/* Rutas de FUD con Navbar */}
+        <Route path="/fud/menu" element={<><Navbar /><Menu cart={cart} setCart={setCart} /></>} />
+        <Route path="/fud/cart" element={<><Navbar /><Cart cart={cart} setCart={setCart} /></>} />
+        <Route path="/fud/checkout" element={<><Navbar /><Checkout cart={cart} /></>} />
+        <Route path="/fud/order-confirmation" element={<><Navbar /><OrderConfirmation /></>} />
+        <Route path="/fud/payment-failed" element={<><Navbar /><PaymentFailed /></>} />
+        <Route path="/fud/payment-pending" element={<><Navbar /><PaymentPending /></>} />
+        <Route path="/fud/restaurante" element={<><Navbar /><RestauranteLogin /></>} />
+        <Route path="/fud/restaurante/dashboard" element={<><Navbar /><RestauranteDashboard /></>} />
+        <Route path="/fud/restaurante/pedidos" element={<><Navbar /><Pedidos /></>} />
+        <Route path="/fud/restaurante/menu" element={<><Navbar /><MenuDashboard /></>} />
+        <Route path="/fud/restaurante/estadisticas" element={<><Navbar /><Estadisticas /></>} />
       </Routes>
     </Router>
   );

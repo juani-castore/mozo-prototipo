@@ -204,7 +204,7 @@ const Menu = () => {
       </button>
 
       <button
-        onClick={() => navigate("/cart")}
+        onClick={() => navigate("/fud/cart")}
         className="fixed bottom-4 right-4 z-50 bg-gold text-brick font-extrabold rounded-xl 
              shadow-xl ring-2 ring-yellow-300/40 hover:shadow-2xl motion-safe:hover:-translate-y-0.5 
              transition-all tracking-tight

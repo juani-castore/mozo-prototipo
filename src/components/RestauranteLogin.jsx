@@ -14,7 +14,7 @@ const RestauranteLogin = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/restaurante/dashboard"); // ruta intermedia nueva
+      navigate("/fud/restaurante/dashboard"); // ruta intermedia nueva
     } catch (err) {
       setError("Error al iniciar sesión. Verifica tus credenciales.");
     }

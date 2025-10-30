@@ -15,19 +15,19 @@ const RestauranteDashboard = () => {
       <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
         <button
           className="w-full bg-brick text-white px-6 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:bg-brick-light font-black tracking-tight border-2 border-brick transition-all duration-200 motion-safe:hover:-translate-y-0.5"
-          onClick={() => navigate("/restaurante/pedidos")}
+          onClick={() => navigate("/fud/restaurante/pedidos")}
         >
           📋 Pedidos
         </button>
         <button
           className="w-full bg-gold text-brick px-6 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:bg-white font-black tracking-tight border-2 border-gold transition-all duration-200 motion-safe:hover:-translate-y-0.5"
-          onClick={() => navigate("/restaurante/menu")}
+          onClick={() => navigate("/fud/restaurante/menu")}
         >
           🍽️ Menú
         </button>
         <button
           className="w-full bg-brick text-white px-6 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:bg-brick-light font-black tracking-tight border-2 border-brick transition-all duration-200 motion-safe:hover:-translate-y-0.5"
-          onClick={() => navigate("/restaurante/estadisticas")}
+          onClick={() => navigate("/fud/restaurante/estadisticas")}
         >
           📊 Estadísticas
         </button>
