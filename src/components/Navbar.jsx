@@ -6,19 +6,19 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-r from-brick to-brick shadow-xl border-b-2 border-gold/20">
+    <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-pickap-gray-dark/10">
       <div className="mx-auto max-w-7xl px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/fud/menu" className="flex items-center gap-2">
-            <img src={logo} alt="Logo Pickup" className="h-9 md:h-10 drop-shadow-lg" />
+            <img src={logo} alt="Logo Pickap" className="h-9 md:h-10" />
           </Link>
 
           {/* Botón hamburguesa (mobile) */}
           <button
             aria-label="Abrir menú"
             aria-expanded={isMenuOpen}
-            className="md:hidden rounded-xl p-2 text-gold hover:bg-white/10 hover:text-gold transition-all border-2 border-transparent hover:border-gold/40"
+            className="md:hidden rounded-xl p-2 text-pickap-black hover:bg-pickap-gray transition-all"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg
@@ -36,19 +36,19 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-2">
             <Link
               to="/fud/menu"
-              className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
+              className="px-4 py-2 text-sm font-semibold text-pickap-black hover:bg-pickap-gray rounded-xl transition-all"
             >
               Menú
             </Link>
             <Link
               to="/fud/cart"
-              className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
+              className="px-4 py-2 text-sm font-semibold text-pickap-black hover:bg-pickap-gray rounded-xl transition-all"
             >
               Carrito
             </Link>
             <Link
               to="/fud/restaurante"
-              className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
+              className="px-4 py-2 text-sm font-semibold text-pickap-black hover:bg-pickap-gray rounded-xl transition-all"
             >
               Restaurante
             </Link>
@@ -56,9 +56,9 @@ const Navbar = () => {
               href="https://mozo-phi.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 text-sm font-black text-brick bg-gold hover:bg-white hover:text-brick rounded-xl shadow-lg hover:shadow-xl transition-all tracking-tight border-2 border-gold"
+              className="px-4 py-2 text-sm font-bold text-pickap-black bg-pickap-yellow hover:bg-pickap-yellow/90 rounded-xl shadow-sm hover:shadow transition-all"
             >
-              PICKUP
+              Pickap
             </a>
           </div>
         </div>
@@ -69,25 +69,25 @@ const Navbar = () => {
             isMenuOpen ? "max-h-96 mt-3" : "max-h-0"
           }`}
         >
-          <div className="flex flex-col gap-2 rounded-2xl bg-white/5 p-3 backdrop-blur border-2 border-white/10">
+          <div className="flex flex-col gap-2 rounded-2xl bg-pickap-gray p-3">
             <Link
               to="/fud/menu"
               onClick={() => setIsMenuOpen(false)}
-              className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
+              className="w-full px-4 py-2 text-sm font-semibold text-pickap-black hover:bg-white rounded-xl transition-all"
             >
               Menú
             </Link>
             <Link
               to="/fud/cart"
               onClick={() => setIsMenuOpen(false)}
-              className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
+              className="w-full px-4 py-2 text-sm font-semibold text-pickap-black hover:bg-white rounded-xl transition-all"
             >
               Carrito
             </Link>
             <Link
               to="/fud/restaurante"
               onClick={() => setIsMenuOpen(false)}
-              className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
+              className="w-full px-4 py-2 text-sm font-semibold text-pickap-black hover:bg-white rounded-xl transition-all"
             >
               Restaurante
             </Link>
@@ -96,9 +96,9 @@ const Navbar = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMenuOpen(false)}
-              className="w-full px-4 py-2 text-sm font-black text-brick bg-gold hover:bg-white rounded-xl shadow-lg hover:shadow-xl transition-all tracking-tight border-2 border-gold"
+              className="w-full px-4 py-2 text-sm font-bold text-pickap-black bg-pickap-yellow hover:bg-pickap-yellow/90 rounded-xl shadow-sm transition-all"
             >
-              PICKUP
+              Pickap
             </a>
           </div>
         </div>
