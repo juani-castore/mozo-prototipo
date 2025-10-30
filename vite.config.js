@@ -4,9 +4,9 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/fud/',  // ✅ Base path para deploy en /fud
+  base: '/',  // Base path en root
   build: {
-    outDir: 'dist/fud',  // ← Generar archivos en dist/fud/
+    outDir: 'dist',
     emptyOutDir: true,
   }
 })

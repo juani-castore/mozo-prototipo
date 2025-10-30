@@ -10,7 +10,7 @@ const Navbar = () => {
       <div className="mx-auto max-w-7xl px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/fud/menu" className="flex items-center gap-2">
             <img src={logo} alt="Logo Pickup" className="h-9 md:h-10 drop-shadow-lg" />
           </Link>
 
@@ -35,19 +35,19 @@ const Navbar = () => {
           {/* Enlaces (desktop) */}
           <div className="hidden md:flex items-center gap-2">
             <Link
-              to="/"
+              to="/fud/menu"
               className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
             >
               Menú
             </Link>
             <Link
-              to="/cart"
+              to="/fud/cart"
               className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
             >
               Carrito
             </Link>
             <Link
-              to="/restaurante"
+              to="/fud/restaurante"
               className="px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 bg-white/0 hover:bg-white/10 transition-all tracking-tight"
             >
               Restaurante
@@ -71,21 +71,21 @@ const Navbar = () => {
         >
           <div className="flex flex-col gap-2 rounded-2xl bg-white/5 p-3 backdrop-blur border-2 border-white/10">
             <Link
-              to="/"
+              to="/fud/menu"
               onClick={() => setIsMenuOpen(false)}
               className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
             >
               Menú
             </Link>
             <Link
-              to="/cart"
+              to="/fud/cart"
               onClick={() => setIsMenuOpen(false)}
               className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
             >
               Carrito
             </Link>
             <Link
-              to="/restaurante"
+              to="/fud/restaurante"
               onClick={() => setIsMenuOpen(false)}
               className="w-full px-4 py-2 text-sm font-black text-gold hover:text-white rounded-xl border-2 border-gold/40 hover:border-white/40 hover:bg-white/10 transition-all tracking-tight"
             >
