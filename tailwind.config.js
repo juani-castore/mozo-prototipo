@@ -8,13 +8,23 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Nueva paleta Pickap
+        'pickap-yellow': '#F5C518',
+        'pickap-black': '#1B1B1B',
+        'pickap-white': '#FFFFFF',
+        'pickap-green': '#4CAF50',
+        'pickap-red': '#E53935',
+        'pickap-gray': '#F9FAFB',
+        'pickap-gray-dark': '#6B7280',
+        
+        // Alias legacy para compatibilidad (se irán removiendo)
         beige:    '#CCAD7F',
-        brick:    '#CC603B',
-        'brick-light': '#CC7A3B',
-        mustard: '#CCB53B',
-        copper:  '#CC7A3B',
-        gold:     '#EFD700',
-        'gold-light': '#E6CBA8',
+        brick:    '#1B1B1B', // Ahora mapea a negro Pickap
+        'brick-light': '#1B1B1B',
+        mustard: '#F5C518', // Ahora mapea a amarillo Pickap
+        copper:  '#F5C518',
+        gold:     '#F5C518', // Ahora mapea a amarillo Pickap
+        'gold-light': '#FDE68A',
         olive:    '#556B2F',
         teal:     '#2C7A7B',
         navy:     '#2A4365',
